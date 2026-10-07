@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <span>
-
+#include "MeshData.h"
 
 struct SDL_Window;
 
@@ -22,6 +22,7 @@ namespace HUNT {
         void UpdateGPU();
         void CreatePipeline();
         void CreateVertexBuffer(std::span<Vertex>verticies);
+        void Render();
         void Present();
         void    Clear(std::uint8_t red, std::uint8_t green, std::uint8_t blue);
         //Rectangle maker

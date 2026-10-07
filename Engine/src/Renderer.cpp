@@ -1,5 +1,4 @@
 
-
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/MeshData.h>
 #include <SDL3/SDL.h>
@@ -30,13 +29,14 @@ namespace HUNT {
       /*  struct GPUPipelineDeleter {
             void operator()(SDL_GPUDevice* GPUDevice, SDL_GPUGraphicsPipeline* gpuPipeline) const noexcept {SDL_ReleaseGPUGraphicsPipeline(GPUDevice,gpuPipeline); }
         };*/
-     
+        
        
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
       //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
-        std::unique_ptr<SDL_GPUBuffer> vertexBuffer;
+        SDL_GPUBuffer* vertexBuffer = nullptr;
+
         Uint32 numVerticies;
        
         ~Impl() { Shutdown(); }
@@ -48,7 +48,10 @@ namespace HUNT {
                 SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(),gpuPipeline);
                 gpuPipeline = nullptr;
             }
-
+            if (gpuPipeline) {
+                SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(), gpuPipeline);
+                gpuPipeline = nullptr;
+            }
            SDL_ReleaseWindowFromGPUDevice(gpuDevice.get(), window);
            
             gpuDevice.reset();
@@ -92,6 +95,20 @@ namespace HUNT {
         }
 
         CreatePipeline();
+
+
+
+        //TESTING STUFF
+
+        std::array vertices{
+    Vertex{-1.0f, -1.0f, 0.0f}, // Bottom-Left
+    Vertex{1.0f, -1.0f, 0.0f}, // Bottom-Right
+    Vertex{0.0f, 1.0f, 0.0f}, // Top-Middle
+        };
+
+        CreateVertexBuffer(vertices);
+       
+
     }
 
 
@@ -254,7 +271,7 @@ namespace HUNT {
             .num_color_targets = colorTargetDescriptions.size(),
         },
         };
-        impl_->gpuPipeline = SDL_CreateGPUGraphicsPipeline(impl_->gpuDevice.get(), &pipelineCreateInfo); //THIS IS A RAW POINTER
+        impl_->gpuPipeline = SDL_CreateGPUGraphicsPipeline(impl_->gpuDevice.get(), &pipelineCreateInfo);
         if (impl_->gpuPipeline == nullptr)
         {
             SDL_Log("Couldn't create graphics pipeline! %s", SDL_GetError());
@@ -268,6 +285,7 @@ namespace HUNT {
    
     void Renderer::CreateVertexBuffer(std::span<Vertex>verticies)
     {
+        //VERTEX BUFFER
         impl_->numVerticies = verticies.size();
         Uint32 verticesSize = impl_->numVerticies * sizeof(Vertex);
         //Make vertex buffer based on size
@@ -276,12 +294,81 @@ namespace HUNT {
             .size = verticesSize,
         };
 
-        impl_->vertexBuffer.reset(SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo));
+        impl_->vertexBuffer = SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo);
         if (impl_->vertexBuffer == nullptr)
         {
             SDL_Log("Couldn't create vertex buffer: %s", SDL_GetError());
             impl_->Shutdown();
         }
+
+
+
+        //TRANSFER BUFFER DIF CALL MAYBE?
+        SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
+          .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+          .size = verticesSize,
+        };
+        SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(impl_->gpuDevice.get(), &transferBufferCreateInfo);
+        if (transferBuffer == nullptr)
+        {
+            SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
+            impl_->Shutdown();
+        }
+
+        Vertex* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(impl_->gpuDevice.get(),transferBuffer, false));
+        if (transferData == nullptr)
+        {
+            SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
+            SDL_ReleaseGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer);
+            impl_->Shutdown();
+        }
+
+
+        SDL_memcpy(transferData, verticies.data(), verticesSize); //Copy verticies into the memory the transfer buffer mapped for us
+
+        SDL_UnmapGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer); //unmap the transfer buffer pointer as not needed
+
+
+        //Command buffer to upload to the vertex buffer
+
+        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get());
+        if (uploadCmdBuf == nullptr)
+        {
+            SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
+            impl_->Shutdown();
+        }
+
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
+
+        SDL_GPUTransferBufferLocation bufferLocation = SDL_GPUTransferBufferLocation{
+    .transfer_buffer = transferBuffer,
+    .offset = 0,
+        };
+        SDL_GPUBufferRegion bufferRegion = SDL_GPUBufferRegion{
+    .buffer = impl_->vertexBuffer ,
+    .offset = 0,
+    .size = verticesSize,
+        };
+
+
+        SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
+
+
+        SDL_EndGPUCopyPass(copyPass);
+        if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf))
+        {
+            SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
+            impl_->Shutdown();
+        }
+
+        SDL_ReleaseGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer);
+    }
+
+    void Renderer::Render()
+    {
+       // SDL_BindGPUGraphicsPipeline(renderPass, impl_->gpuPipeline.get());
+
+
     }
 
 
@@ -307,10 +394,27 @@ namespace HUNT {
         colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
         colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
-
+        //THIS IS THE RENDERPASS
         SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, nullptr);
-        SDL_EndGPURenderPass(renderPass);
 
+        SDL_BindGPUGraphicsPipeline(renderPass, impl_->gpuPipeline);
+
+        std::array vertexBuffers{
+    SDL_GPUBufferBinding{
+        .buffer = impl_->vertexBuffer,
+        .offset = 0,
+    },
+        };
+        SDL_BindGPUVertexBuffers(renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
+
+
+        SDL_DrawGPUPrimitives(renderPass, impl_->numVerticies, 1, 0, 0);
+
+
+
+        
+        SDL_EndGPURenderPass(renderPass);
+        //END OF RENDER PASS ABOVE
 
 
         SDL_SubmitGPUCommandBuffer(commandBuffer);
