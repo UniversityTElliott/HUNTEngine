@@ -11,7 +11,7 @@ namespace HUNTgame {
 
     bool DemoGame::Start(HUNT::Engine& engine) {
         engine.GetRenderer().InitGPU();
-        engine.GetRenderer().CreatePipeline();
+       
         previousTime_ = currentTime_ = 0.0f;
         return true;
     }

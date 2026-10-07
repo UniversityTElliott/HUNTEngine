@@ -170,10 +170,10 @@ add_custom_target(
 )
 endmacro()
 COMPILE_SHADERS()
-#Dont need
-#add_dependencies(
- #   HUNTGame
-  #  HUNTEngine_shaders
-#)
+#Dont need???
+add_dependencies(
+   HUNTGame
+   HUNTEngine_shaders
+)
 
 

@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include<filesystem>
+#include <span>
 
 namespace HUNT {
 
@@ -26,13 +27,17 @@ namespace HUNT {
         struct GPUDeviceDeleter {
             void operator()(SDL_GPUDevice* GPUDevice) const noexcept { SDL_DestroyGPUDevice(GPUDevice); }
         };
+      /*  struct GPUPipelineDeleter {
+            void operator()(SDL_GPUDevice* GPUDevice, SDL_GPUGraphicsPipeline* gpuPipeline) const noexcept {SDL_ReleaseGPUGraphicsPipeline(GPUDevice,gpuPipeline); }
+        };*/
      
        
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
+      //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
-        
-        
+        std::unique_ptr<SDL_GPUBuffer> vertexBuffer;
+        Uint32 numVerticies;
        
         ~Impl() { Shutdown(); }
 
@@ -86,6 +91,7 @@ namespace HUNT {
             impl_->gpuDevice.reset();
         }
 
+        CreatePipeline();
     }
 
 
@@ -175,20 +181,20 @@ namespace HUNT {
         return shader;
     }
 
-    bool Renderer::CreatePipeline() {
+    void Renderer::CreatePipeline() {
         //'Use helped to load the vertex shader
         SDL_GPUShader* vertexShader = LoadShader(impl_->gpuDevice.get(), "OnlyPosition.vert");
         if (vertexShader == nullptr)
         {
             SDL_Log("Couldn't create vertex shader!");
-            return false;
+            impl_->Shutdown();
         }
         //Then the fragment shader
         SDL_GPUShader* fragmentShader = LoadShader(impl_->gpuDevice.get(), "SolidColor.frag");
         if (fragmentShader == nullptr)
         {
             SDL_Log("Couldn't create fragment shader!");
-            return false;
+            impl_->Shutdown();
         }
 
         //Make vertex buffer
@@ -248,16 +254,34 @@ namespace HUNT {
             .num_color_targets = colorTargetDescriptions.size(),
         },
         };
-        impl_->gpuPipeline = SDL_CreateGPUGraphicsPipeline(impl_->gpuDevice.get(), &pipelineCreateInfo);
+        impl_->gpuPipeline = SDL_CreateGPUGraphicsPipeline(impl_->gpuDevice.get(), &pipelineCreateInfo); //THIS IS A RAW POINTER
         if (impl_->gpuPipeline == nullptr)
         {
             SDL_Log("Couldn't create graphics pipeline! %s", SDL_GetError());
-            return false;
+            impl_->Shutdown();
         }
 
 
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), vertexShader);
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), fragmentShader);
+    }
+   
+    void Renderer::CreateVertexBuffer(std::span<Vertex>verticies)
+    {
+        impl_->numVerticies = verticies.size();
+        Uint32 verticesSize = impl_->numVerticies * sizeof(Vertex);
+        //Make vertex buffer based on size
+        SDL_GPUBufferCreateInfo vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
+            .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+            .size = verticesSize,
+        };
+
+        impl_->vertexBuffer.reset(SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo));
+        if (impl_->vertexBuffer == nullptr)
+        {
+            SDL_Log("Couldn't create vertex buffer: %s", SDL_GetError());
+            impl_->Shutdown();
+        }
     }
 
 

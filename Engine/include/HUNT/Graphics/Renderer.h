@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <span>
 
 
 struct SDL_Window;
@@ -19,7 +20,8 @@ namespace HUNT {
         void SetVSync(bool enabled);
         void InitGPU();
         void UpdateGPU();
-        bool CreatePipeline();
+        void CreatePipeline();
+        void CreateVertexBuffer(std::span<Vertex>verticies);
         void Present();
         void    Clear(std::uint8_t red, std::uint8_t green, std::uint8_t blue);
         //Rectangle maker
