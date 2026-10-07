@@ -61,9 +61,9 @@ endif()
 
 #https://github.com/TechnicJelle/GPUForBeginners/blob/ab63d5d11df06466a67ec46a5e8cd51723629203/CMakeLists.txt#L35-L68 adapted from here
 
-# ============================================================
+
 # Shader Compilation CLEAN UP A TAD
-# ============================================================
+
 
 macro(COMPILE_SHADERS)
 set(SHADERS_DIR
@@ -74,18 +74,19 @@ set(SHADERS_DIR
 set(SHADERS_OUTPUT_DIR
     "$<TARGET_FILE_DIR:HUNTGame>/shaders"
 )
-
+#Find shadercross
 find_program(SC_EXECUTABLE
     shadercross
     REQUIRED
     HINTS
         "${CMAKE_SOURCE_DIR}/Engine/Tools/ShaderCross"
 )
-
+#get all hlsl files
 file(GLOB_RECURSE SHADER_FILES
     CONFIGURE_DEPENDS
     "${SHADERS_DIR}/*.hlsl"
 )
+
 
 set(COMPILED_SHADERS)
 
@@ -95,7 +96,7 @@ foreach(SHADER ${SHADER_FILES})
         "${SHADER}"
         NAME
     )
-
+    #Create all the final files 
     string(REPLACE ".hlsl" ".spv"
         SPV_NAME
         "${SHADER_NAME}"
@@ -122,7 +123,7 @@ foreach(SHADER ${SHADER_FILES})
     set(DXIL
         "${CMAKE_CURRENT_BINARY_DIR}/shaders/${DXIL_NAME}"
     )
-
+    #Command to run shadercross on all the types
     add_custom_command(
         OUTPUT
             "${SPV}"
@@ -151,9 +152,9 @@ foreach(SHADER ${SHADER_FILES})
         DEPENDS
             "${SHADER}"
 
-        VERBATIM
+        VERBATIM #This exists so cmake listens to me
     )
-
+    #Add all the shaders to list called COMPILED_SHADERS
     list(APPEND COMPILED_SHADERS
         "${SPV}"
         "${MSL}"
@@ -168,12 +169,13 @@ add_custom_target(
     DEPENDS
         ${COMPILED_SHADERS}
 )
-endmacro()
-COMPILE_SHADERS()
-#Dont need???
+
 add_dependencies(
    HUNTGame
    HUNTEngine_shaders
 )
+endmacro()
+COMPILE_SHADERS()
+
 
 
