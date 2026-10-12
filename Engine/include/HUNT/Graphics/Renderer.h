@@ -3,9 +3,14 @@
 #include <cstdint>
 #include <memory>
 #include <span>
-#include "MeshData.h"
+#include"HUNTMesh/Mesh.h"
+
+
 
 struct SDL_Window;
+struct SDL_GPUBuffer;
+
+
 
 namespace HUNT {
 
@@ -19,14 +24,15 @@ namespace HUNT {
 
         void SetVSync(bool enabled);
         void InitGPU();
-        void UpdateGPU();
         void CreatePipeline();
-        void CreateVertexBuffer(std::span<Vertex>verticies);
-        void Render();
-        void Present();
-        void    Clear(std::uint8_t red, std::uint8_t green, std::uint8_t blue);
-        //Rectangle maker
-        void drawRectangle();
+        SDL_GPUBuffer* CreateVertexBuffer(std::span<Vertex>verticies);
+        SDL_GPUBuffer* CreateIndexBuffer(std::span<const std::uint32_t> indices);
+        void BeginFrame();
+        void Render(HUNT::Mesh meshIn);
+        void EndFrame();
+
+
+        //add set bg cvolour
 
     private:
         struct Impl;

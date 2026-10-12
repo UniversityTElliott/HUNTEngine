@@ -1,6 +1,7 @@
 
+
 #include <HUNT/Graphics/Renderer.h>
-#include <HUNT/Graphics/MeshData.h>
+#include <HUNT/Graphics/HUNTMesh/MeshData.h>
 #include <SDL3/SDL.h>
 #include <array>
 #include <algorithm>
@@ -15,10 +16,10 @@
 namespace HUNT {
 
     struct Renderer::Impl {
-        
+
         SDL_Window* window;  // borrowed
 
-        
+
 
         struct RendererDeleter {
             void operator()(SDL_Renderer* renderer) const noexcept { SDL_DestroyRenderer(renderer); }
@@ -26,39 +27,43 @@ namespace HUNT {
         struct GPUDeviceDeleter {
             void operator()(SDL_GPUDevice* GPUDevice) const noexcept { SDL_DestroyGPUDevice(GPUDevice); }
         };
-      /*  struct GPUPipelineDeleter {
-            void operator()(SDL_GPUDevice* GPUDevice, SDL_GPUGraphicsPipeline* gpuPipeline) const noexcept {SDL_ReleaseGPUGraphicsPipeline(GPUDevice,gpuPipeline); }
-        };*/
-        
-       
+        /*  struct GPUPipelineDeleter {
+              void operator()(SDL_GPUDevice* GPUDevice, SDL_GPUGraphicsPipeline* gpuPipeline) const noexcept {SDL_ReleaseGPUGraphicsPipeline(GPUDevice,gpuPipeline); }
+          };*/
+
+       HUNT::float4 defaultColour{0.f,0.f,0.f,1.f};
+
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
-      //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
+        //SDL manages these so raw is OK
+        SDL_GPURenderPass* renderPass = nullptr;
+        SDL_GPUCommandBuffer* commandBuffer = nullptr;
+        //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
-        SDL_GPUBuffer* vertexBuffer = nullptr;
 
-        Uint32 numVerticies;
-       
+        std::vector<SDL_GPUBuffer*> frameVertexBuffers;
+
+
         ~Impl() { Shutdown(); }
 
         void Shutdown() noexcept {
             //cleanup
             //Cleanup raw pointer
             if (gpuPipeline) {
-                SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(),gpuPipeline);
+                SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(), gpuPipeline);
                 gpuPipeline = nullptr;
             }
             if (gpuPipeline) {
                 SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(), gpuPipeline);
                 gpuPipeline = nullptr;
             }
-           SDL_ReleaseWindowFromGPUDevice(gpuDevice.get(), window);
-           
+            SDL_ReleaseWindowFromGPUDevice(gpuDevice.get(), window);
+
             gpuDevice.reset();
-            
+
         }
 
-       
+
         explicit Impl(SDL_Window* window)
             : window(window)
         {
@@ -73,11 +78,11 @@ namespace HUNT {
 
     void Renderer::SetVSync(bool enabled)
     {
-       SDL_SetRenderVSync(impl_->renderer3D.get(), enabled);
+        SDL_SetRenderVSync(impl_->renderer3D.get(), enabled);
     }
     void Renderer::InitGPU()
     {
-        //Init GPU and window
+        //CREATES GPU DEVICE
         SDL_GPUShaderFormat formatFlags = SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
         impl_->gpuDevice.reset(SDL_CreateGPUDevice(formatFlags, true, nullptr));
         if (impl_->gpuDevice == nullptr)
@@ -86,7 +91,7 @@ namespace HUNT {
             impl_->gpuDevice.reset();
 
         }
-
+        //ATTACHES GPU DEVICE TO WINDOW
         if (!SDL_ClaimWindowForGPUDevice(impl_->gpuDevice.get(), impl_->window))
         {
             SDL_Log("2. Couldn't claim window for GPU device: %s", SDL_GetError());
@@ -95,20 +100,6 @@ namespace HUNT {
         }
 
         CreatePipeline();
-
-
-
-        //TESTING STUFF
-
-        std::array vertices{
-    Vertex{-1.0f, -1.0f, 0.0f}, // Bottom-Left
-    Vertex{1.0f, -1.0f, 0.0f}, // Bottom-Right
-    Vertex{0.0f, 1.0f, 0.0f}, // Top-Middle
-        };
-
-        CreateVertexBuffer(vertices);
-       
-
     }
 
 
@@ -199,22 +190,27 @@ namespace HUNT {
     }
 
     void Renderer::CreatePipeline() {
-        //'Use helped to load the vertex shader
+        //LOAD VERTEX SHADER
         SDL_GPUShader* vertexShader = LoadShader(impl_->gpuDevice.get(), "OnlyPosition.vert");
         if (vertexShader == nullptr)
         {
             SDL_Log("Couldn't create vertex shader!");
             impl_->Shutdown();
         }
-        //Then the fragment shader
+        //LOAD FRAGMENT SHADER
         SDL_GPUShader* fragmentShader = LoadShader(impl_->gpuDevice.get(), "SolidColor.frag");
         if (fragmentShader == nullptr)
         {
             SDL_Log("Couldn't create fragment shader!");
             impl_->Shutdown();
         }
+        //lOAD ALL OTHER SHADERS BELOW
+         
+    
 
-        //Make vertex buffer
+
+
+        //Blocks off chunks of memory of size vertex, basically says each vertex is that much data in memory
         std::array vertexBufferDescriptions{
     SDL_GPUVertexBufferDescription{
         .slot = 0,
@@ -224,25 +220,21 @@ namespace HUNT {
     },
         };
 
-
+        //Inside the chunks says what data is what
+        //First set is position and its a float3
         std::array vertexAttributes{
     SDL_GPUVertexAttribute{
         .location = 0,
         .buffer_slot = 0,
-        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-        .offset = 0 * sizeof(float),
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,
+        .offset = offsetof(Vertex, position),
     },
+    //next set is colour and its a float4
     SDL_GPUVertexAttribute{
-        .location = 1,
-        .buffer_slot = 0,
-        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-        .offset = 1 * sizeof(float),
-    },
-    SDL_GPUVertexAttribute{
-        .location = 2,
-        .buffer_slot = 0,
-        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT,
-        .offset = 2 * sizeof(float),
+       .location = 1,
+       .buffer_slot = 0,
+        .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
+         .offset = offsetof(Vertex, colour),
     },
         };
 
@@ -252,7 +244,7 @@ namespace HUNT {
     }
         };
 
-
+        //Build the grapphics pipeline with the afformentioned set parts
         SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
         .fragment_shader = fragmentShader,
@@ -262,7 +254,7 @@ namespace HUNT {
             .vertex_attributes = vertexAttributes.data(),
             .num_vertex_attributes = vertexAttributes.size(),
         },
-        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
+        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST, //Allow this to change
         .rasterizer_state = SDL_GPURasterizerState{
             .fill_mode = SDL_GPU_FILLMODE_FILL,
         },
@@ -271,6 +263,8 @@ namespace HUNT {
             .num_color_targets = colorTargetDescriptions.size(),
         },
         };
+
+        //Actually create the pipeline using the set information above
         impl_->gpuPipeline = SDL_CreateGPUGraphicsPipeline(impl_->gpuDevice.get(), &pipelineCreateInfo);
         if (impl_->gpuPipeline == nullptr)
         {
@@ -278,24 +272,27 @@ namespace HUNT {
             impl_->Shutdown();
         }
 
-
+        //Release the shaders as theyve been set and added to the pipeline
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), vertexShader);
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), fragmentShader);
     }
    
-    void Renderer::CreateVertexBuffer(std::span<Vertex>verticies)
+
+
+    SDL_GPUBuffer* Renderer::CreateVertexBuffer(std::span<Vertex>verticies) //ASSIGN VERTEX BUFFER
     {
         //VERTEX BUFFER
-        impl_->numVerticies = verticies.size();
-        Uint32 verticesSize = impl_->numVerticies * sizeof(Vertex);
+
+        
+        Uint32 verticesSize = verticies.size() * static_cast<Uint32>(sizeof(Vertex));
         //Make vertex buffer based on size
         SDL_GPUBufferCreateInfo vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
             .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
             .size = verticesSize,
         };
 
-        impl_->vertexBuffer = SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo);
-        if (impl_->vertexBuffer == nullptr)
+        SDL_GPUBuffer* vertexBuffer= SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo);
+        if (vertexBuffer == nullptr)
         {
             SDL_Log("Couldn't create vertex buffer: %s", SDL_GetError());
             impl_->Shutdown();
@@ -341,14 +338,13 @@ namespace HUNT {
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
         SDL_GPUTransferBufferLocation bufferLocation = SDL_GPUTransferBufferLocation{
-    .transfer_buffer = transferBuffer,
-    .offset = 0,
-        };
+            .transfer_buffer = transferBuffer,
+            .offset = 0,};
+
         SDL_GPUBufferRegion bufferRegion = SDL_GPUBufferRegion{
-    .buffer = impl_->vertexBuffer ,
-    .offset = 0,
-    .size = verticesSize,
-        };
+            .buffer = vertexBuffer ,
+            .offset = 0,
+            .size = verticesSize,};
 
 
         SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
@@ -362,90 +358,80 @@ namespace HUNT {
         }
 
         SDL_ReleaseGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer);
-    }
 
-    void Renderer::Render()
-    {
-       // SDL_BindGPUGraphicsPipeline(renderPass, impl_->gpuPipeline.get());
-
-
+        return vertexBuffer;
     }
 
 
-    void Renderer::UpdateGPU()
+    void Renderer::BeginFrame()
     {
-        SDL_GPUCommandBuffer* commandBuffer = SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get());
-        if (commandBuffer == nullptr)
-        {
-            SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
-            //Explode
-        }
-
+        //Make command buffer and swapchain texture
+        impl_->commandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
         SDL_GPUTexture* swapchainTexture;
-        if (!SDL_WaitAndAcquireGPUSwapchainTexture(commandBuffer, impl_->window, &swapchainTexture, nullptr, nullptr))
+
+        if (!impl_->commandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->commandBuffer, impl_->window, &swapchainTexture, nullptr, nullptr))
         {
-            SDL_Log("Couldn't acquire swapchain texture: %s", SDL_GetError());
-            //Explode
+            // Explode
         }
 
         SDL_GPUColorTargetInfo colorTargetInfo = {};
         colorTargetInfo.texture = swapchainTexture;
-        colorTargetInfo.clear_color = { 0.4f, 0.6f, 0.9f, 1.0f };
+        colorTargetInfo.clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w};
         colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
         colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
-        //THIS IS THE RENDERPASS
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(commandBuffer, &colorTargetInfo, 1, nullptr);
 
-        SDL_BindGPUGraphicsPipeline(renderPass, impl_->gpuPipeline);
+        impl_->renderPass = (SDL_BeginGPURenderPass(impl_->commandBuffer, &colorTargetInfo, 1, nullptr)); //Begin Render Pass.
+        swapchainTexture = nullptr;
+    }
+
+    void Renderer::Render(HUNT::Mesh meshIn)
+    {
+        auto meshInVerticies = meshIn.getMeshData().vertices;
+
+        SDL_BindGPUGraphicsPipeline(impl_->renderPass,impl_->gpuPipeline);
+        //Make vertex buffer using mesh and add it to the list to be culled later
+        SDL_GPUBuffer* vertexBuffer = CreateVertexBuffer(meshInVerticies);
+        impl_->frameVertexBuffers.push_back(vertexBuffer);
 
         std::array vertexBuffers{
-    SDL_GPUBufferBinding{
-        .buffer = impl_->vertexBuffer,
-        .offset = 0,
-    },
+            SDL_GPUBufferBinding{
+                .buffer = vertexBuffer,
+                .offset = 0,
+            },
         };
-        SDL_BindGPUVertexBuffers(renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
+        SDL_BindGPUVertexBuffers(impl_->renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
+
+        SDL_DrawGPUPrimitives(impl_->renderPass, meshInVerticies.size(), 1, 0, 0);
 
 
-        SDL_DrawGPUPrimitives(renderPass, impl_->numVerticies, 1, 0, 0);
-
-
-
-        
-        SDL_EndGPURenderPass(renderPass);
-        //END OF RENDER PASS ABOVE
-
-
-        SDL_SubmitGPUCommandBuffer(commandBuffer);
     }
 
 
 
 
-    void Renderer::Present() {
 
-        SDL_RenderPresent(impl_->renderer3D.get());
+
+    void Renderer::EndFrame() {
+
+        SDL_EndGPURenderPass(impl_->renderPass); //End Render Pass.
+        impl_->renderPass = nullptr;
+
+        SDL_SubmitGPUCommandBuffer(impl_->commandBuffer); //Submit to GPU.
+        impl_->commandBuffer = nullptr;
+
+
+        //For each buffer release it on the GPU  CHANGE THIS LATER MAYBE REUSE?!
+        for (SDL_GPUBuffer* buffer : impl_->frameVertexBuffers)
+        {
+            if (buffer)
+            {
+                SDL_ReleaseGPUBuffer(impl_->gpuDevice.get(), buffer);
+            }
+        }
+
+        impl_->frameVertexBuffers.clear();
     }
 
-    void Renderer::Clear(std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-        if (!impl_->renderer3D)
-            throw std::logic_error("Engine is not initialised");
-        bool result = SDL_SetRenderDrawColor(impl_->renderer3D.get(), red, green, blue, 255);
-        result = SDL_RenderClear(impl_->renderer3D.get());
-    }
-
-    void Renderer::drawRectangle()
-    {
-
-        SDL_FRect rect;
-        rect.x = 0.f;
-        rect.y = 0.f;
-        rect.w = 500.f;
-        rect.h = 500.f;
-
-        SDL_SetRenderDrawColor(impl_->renderer3D.get(), 255, 0, 0, 255);
-        SDL_RenderFillRect(impl_->renderer3D.get(), &rect);
-    }
 
 }

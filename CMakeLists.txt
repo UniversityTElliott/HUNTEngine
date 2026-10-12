@@ -25,14 +25,21 @@ FetchContent_Declare(SDL3
 
 FetchContent_MakeAvailable(SDL3)
 
+FetchContent_Declare(glm
+	GIT_REPOSITORY https://github.com/g-truc/glm.git
+	GIT_TAG 1.0.2
+	GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(glm)
 #Custom Engine stuff below
 #Librarys is basically anything that has a header file
 add_library(Engine STATIC
     Engine/src/Engine.cpp
     Engine/src/Renderer.cpp
- "Engine/include/HUNT/Graphics/MeshData.h")
+ "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h")
 
-add_library(Game STATIC Game/src/Game.cpp "Engine/include/HUNT/Graphics/MeshData.h")
+add_library(Game STATIC Game/src/Game.cpp "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h")
 
 #Anything that has a main
 add_executable(EditorApp EditorApp/src/HUNTEditor.cpp)
@@ -43,6 +50,7 @@ target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
 target_link_libraries(Engine PRIVATE SDL3::SDL3)
+target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Game PUBLIC Engine)
 
 target_link_libraries(HUNTGame PRIVATE Game)

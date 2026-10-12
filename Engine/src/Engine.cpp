@@ -117,7 +117,7 @@ namespace HUNT {
 
                 application.Render(*this);
 
-                impl_->renderer->Present();
+            
 
 				//If we're not using vsync, we need to manually delay to avoid a busy loop that maxes CPU usage.
                 if (!impl_->vsyncEnabled) 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <HUNT/Engine.h>
+#include <HUNT/Graphics/HUNTMesh/Mesh.h>
 
 #include <cstdint>
 
@@ -17,6 +18,10 @@ namespace HUNTgame {
         void Stop(HUNT::Engine& engine) override;
 
     private:
+       
+        HUNT::Mesh triangle1;
+        HUNT::Mesh triangle2;
+
         std::uint8_t red_;
         std::uint8_t green_;
         std::uint8_t blue_;

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 
+
 namespace HUNT {
 
     class Renderer;
@@ -42,6 +43,7 @@ namespace HUNT {
         // https://en.cppreference.com/cpp/language/pimpl
         struct Impl;
         std::unique_ptr<Impl> impl_;
+        
     };
 
 }

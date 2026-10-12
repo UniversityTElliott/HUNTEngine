@@ -10,8 +10,25 @@ namespace HUNTgame {
     }
 
     bool DemoGame::Start(HUNT::Engine& engine) {
-        engine.GetRenderer().InitGPU();
-       
+        auto& renderer = engine.GetRenderer();
+
+        renderer.InitGPU();
+        HUNT::MeshData data1;
+        data1.vertices = std::vector<HUNT::Vertex>{
+            HUNT::Vertex(HUNT::float3(-0.5f, 1.f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(-1.f, 0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.f, 0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f))
+        };
+
+        HUNT::MeshData data2;
+        data2.vertices = std::vector<HUNT::Vertex>{
+            HUNT::Vertex(HUNT::float3(0.5f, 0.f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(1.f, -0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f))
+        };
+
+        triangle1.setMeshData(data1);
+        triangle2.setMeshData(data2);
         previousTime_ = currentTime_ = 0.0f;
         return true;
     }
@@ -22,14 +39,25 @@ namespace HUNTgame {
     }
 
     void DemoGame::Render(HUNT::Engine& engine) {
-       
+        auto& renderer = engine.GetRenderer();
         
+        renderer.BeginFrame();
+
+        renderer.Render(triangle1);
+        renderer.Render(triangle2);
+
+        renderer.EndFrame();
+
+
+
+
+
+
+
         const float time = previousTime_ + (currentTime_ - previousTime_);
         const int glow = static_cast<int>(16.0f * (1.0f + std::sin(time)));
-        engine.GetRenderer().UpdateGPU();
         
-       // engine.GetRenderer().Clear(red_, green_, static_cast<std::uint8_t>(std::min(255, int(blue_) + glow)));
-       // engine.GetRenderer().drawRectangle();
+
     }
 
     void DemoGame::Stop(HUNT::Engine&) {}
