@@ -26,7 +26,7 @@ namespace HUNT {
         void InitGPU();
         void CreatePipeline();
         SDL_GPUBuffer* CreateVertexBuffer(std::span<Vertex>verticies);
-        SDL_GPUBuffer* CreateIndexBuffer(std::span<const std::uint32_t> indices);
+        SDL_GPUBuffer* CreateIndexBuffer(std::span<std::uint32_t> indices);
         void BeginFrame();
         void Render(HUNT::Mesh meshIn);
         void EndFrame();

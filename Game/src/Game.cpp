@@ -15,11 +15,15 @@ namespace HUNTgame {
         renderer.InitGPU();
         HUNT::MeshData data1;
         data1.vertices = std::vector<HUNT::Vertex>{
-            HUNT::Vertex(HUNT::float3(-0.5f, 1.f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(-1.f, 0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.f, 0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f))
-        };
+            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, 0.f), HUNT::float4(1.f, 0.f, 1.f, 1.f))
 
+        };
+        data1.indices = std::vector<uint32_t>{
+            0, 1, 2, 0, 2, 3
+        };
         HUNT::MeshData data2;
         data2.vertices = std::vector<HUNT::Vertex>{
             HUNT::Vertex(HUNT::float3(0.5f, 0.f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
@@ -28,7 +32,7 @@ namespace HUNTgame {
         };
 
         triangle1.setMeshData(data1);
-        triangle2.setMeshData(data2);
+      triangle2.setMeshData(data2);
         previousTime_ = currentTime_ = 0.0f;
         return true;
     }

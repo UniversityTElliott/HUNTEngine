@@ -1,5 +1,4 @@
 
-
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/MeshData.h>
 #include <SDL3/SDL.h>
@@ -277,25 +276,22 @@ namespace HUNT {
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), fragmentShader);
     }
    
+    
+    //Helper function to avoid being in header and repeating code for index and verrtex buffer
+    SDL_GPUBuffer* CreateBuffer(SDL_GPUDevice* gpuDevice,const void* bufferDataIn, Uint32 size, SDL_GPUBufferUsageFlags usage) {
 
-
-    SDL_GPUBuffer* Renderer::CreateVertexBuffer(std::span<Vertex>verticies) //ASSIGN VERTEX BUFFER
-    {
-        //VERTEX BUFFER
-
-        
-        Uint32 verticesSize = verticies.size() * static_cast<Uint32>(sizeof(Vertex));
+          Uint32 dataInSize = static_cast<Uint32>(size);
         //Make vertex buffer based on size
-        SDL_GPUBufferCreateInfo vertexBufferCreateInfo = SDL_GPUBufferCreateInfo{
-            .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-            .size = verticesSize,
+        SDL_GPUBufferCreateInfo bufferCreateInfo = SDL_GPUBufferCreateInfo{
+            .usage = usage,
+            .size = dataInSize,
         };
 
-        SDL_GPUBuffer* vertexBuffer= SDL_CreateGPUBuffer(impl_->gpuDevice.get(), &vertexBufferCreateInfo);
-        if (vertexBuffer == nullptr)
+        SDL_GPUBuffer* gpuBuffer = SDL_CreateGPUBuffer(gpuDevice, &bufferCreateInfo);
+        if (gpuBuffer == nullptr)
         {
             SDL_Log("Couldn't create vertex buffer: %s", SDL_GetError());
-            impl_->Shutdown();
+            return nullptr;
         }
 
 
@@ -303,48 +299,49 @@ namespace HUNT {
         //TRANSFER BUFFER DIF CALL MAYBE?
         SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo = SDL_GPUTransferBufferCreateInfo{
           .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-          .size = verticesSize,
+          .size = size,
         };
-        SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(impl_->gpuDevice.get(), &transferBufferCreateInfo);
+        SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
         if (transferBuffer == nullptr)
         {
             SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
-            impl_->Shutdown();
+            
         }
 
-        Vertex* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(impl_->gpuDevice.get(),transferBuffer, false));
-        if (transferData == nullptr)
+       // Vertex* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false));
+        void* mappedTransferBuffer = SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false);
+        if (mappedTransferBuffer == nullptr)
         {
             SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
-            SDL_ReleaseGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer);
-            impl_->Shutdown();
+            SDL_ReleaseGPUTransferBuffer(gpuDevice, transferBuffer);
+           
         }
 
 
-        SDL_memcpy(transferData, verticies.data(), verticesSize); //Copy verticies into the memory the transfer buffer mapped for us
+        SDL_memcpy(mappedTransferBuffer, bufferDataIn, size); //Copy verticies into the memory the transfer buffer mapped for us
 
-        SDL_UnmapGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer); //unmap the transfer buffer pointer as not needed
+        SDL_UnmapGPUTransferBuffer(gpuDevice, transferBuffer); //unmap the transfer buffer pointer as not needed
 
 
         //Command buffer to upload to the vertex buffer
 
-        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get());
+        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
         if (uploadCmdBuf == nullptr)
         {
             SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
-            impl_->Shutdown();
+            
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
         SDL_GPUTransferBufferLocation bufferLocation = SDL_GPUTransferBufferLocation{
             .transfer_buffer = transferBuffer,
-            .offset = 0,};
+            .offset = 0, };
 
         SDL_GPUBufferRegion bufferRegion = SDL_GPUBufferRegion{
-            .buffer = vertexBuffer ,
+            .buffer = gpuBuffer ,
             .offset = 0,
-            .size = verticesSize,};
+            .size = size, };
 
 
         SDL_UploadToGPUBuffer(copyPass, &bufferLocation, &bufferRegion, false);
@@ -354,15 +351,28 @@ namespace HUNT {
         if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf))
         {
             SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
-            impl_->Shutdown();
+            
         }
 
-        SDL_ReleaseGPUTransferBuffer(impl_->gpuDevice.get(), transferBuffer);
+        SDL_ReleaseGPUTransferBuffer(gpuDevice, transferBuffer);
 
-        return vertexBuffer;
+        return gpuBuffer;
+
+
     }
 
+    SDL_GPUBuffer* Renderer::CreateVertexBuffer(std::span<Vertex>verticies) //ASSIGN VERTEX BUFFER
+    {
+        //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
 
+        return CreateBuffer(impl_->gpuDevice.get(),verticies.data(), verticies.size_bytes(), SDL_GPU_BUFFERUSAGE_VERTEX);
+    }
+
+    SDL_GPUBuffer* Renderer::CreateIndexBuffer(std::span<std::uint32_t> indices) //ASSIGN INDEX BUFFER
+    {
+        //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
+        return CreateBuffer(impl_->gpuDevice.get(), indices.data(), indices.size_bytes(), SDL_GPU_BUFFERUSAGE_INDEX);
+    }
     void Renderer::BeginFrame()
     {
         //Make command buffer and swapchain texture
@@ -387,23 +397,41 @@ namespace HUNT {
 
     void Renderer::Render(HUNT::Mesh meshIn)
     {
+        //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
+
         auto meshInVerticies = meshIn.getMeshData().vertices;
+        auto meshInIndices = meshIn.getMeshData().indices;
 
         SDL_BindGPUGraphicsPipeline(impl_->renderPass,impl_->gpuPipeline);
         //Make vertex buffer using mesh and add it to the list to be culled later
         SDL_GPUBuffer* vertexBuffer = CreateVertexBuffer(meshInVerticies);
         impl_->frameVertexBuffers.push_back(vertexBuffer);
 
-        std::array vertexBuffers{
+        std::array vertexBufferBound{
             SDL_GPUBufferBinding{
                 .buffer = vertexBuffer,
                 .offset = 0,
             },
         };
-        SDL_BindGPUVertexBuffers(impl_->renderPass, 0, vertexBuffers.data(), vertexBuffers.size());
 
-        SDL_DrawGPUPrimitives(impl_->renderPass, meshInVerticies.size(), 1, 0, 0);
+        SDL_BindGPUVertexBuffers(impl_->renderPass, 0, vertexBufferBound.data(), vertexBufferBound.size()); //plural but below isnt?
+        
+        if (meshIn.getMeshData().indices.empty()) {
+            SDL_DrawGPUPrimitives(impl_->renderPass, meshInVerticies.size(), 1, 0, 0);
+            return;
+        }
 
+
+        SDL_GPUBuffer* indexBuffer = CreateIndexBuffer(meshInIndices);
+        impl_->frameVertexBuffers.push_back(indexBuffer);
+        std::array indexBufferBound{
+           SDL_GPUBufferBinding{
+               .buffer = indexBuffer,
+               .offset = 0,
+           },
+        };
+        SDL_BindGPUIndexBuffer(impl_->renderPass,indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
+        SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshInIndices.size(), 1, 0, 0, 0);
 
     }
 
