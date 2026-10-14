@@ -395,12 +395,12 @@ namespace HUNT {
         swapchainTexture = nullptr;
     }
 
-    void Renderer::Render(HUNT::Mesh meshIn)
+    void Renderer::Render(HUNT::MeshData meshDataIn)
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
 
-        auto meshInVerticies = meshIn.getMeshData().vertices;
-        auto meshInIndices = meshIn.getMeshData().indices;
+        auto& meshInVerticies = meshDataIn.vertices;
+        auto& meshInIndices = meshDataIn.indices;
 
         SDL_BindGPUGraphicsPipeline(impl_->renderPass,impl_->gpuPipeline);
         //Make vertex buffer using mesh and add it to the list to be culled later
@@ -416,7 +416,7 @@ namespace HUNT {
 
         SDL_BindGPUVertexBuffers(impl_->renderPass, 0, vertexBufferBound.data(), vertexBufferBound.size()); //plural but below isnt?
         
-        if (meshIn.getMeshData().indices.empty()) {
+        if (meshInIndices.empty()) {
             SDL_DrawGPUPrimitives(impl_->renderPass, meshInVerticies.size(), 1, 0, 0);
             return;
         }

@@ -32,23 +32,29 @@ namespace HUNTgame {
         };
 
         triangle1.setMeshData(data1);
-      triangle2.setMeshData(data2);
+        triangle2.setMeshData(data2);
         previousTime_ = currentTime_ = 0.0f;
+
+       auto meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
+       meshComp->setMeshData(data1);
+
+      
+
         return true;
     }
 
     void DemoGame::FixedUpdate(HUNT::Engine&, float seconds) {
         previousTime_ = currentTime_;
         currentTime_ += seconds;
+        
     }
 
     void DemoGame::Render(HUNT::Engine& engine) {
         auto& renderer = engine.GetRenderer();
         
         renderer.BeginFrame();
-
-        renderer.Render(triangle1);
-        renderer.Render(triangle2);
+        
+        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
 
         renderer.EndFrame();
 
