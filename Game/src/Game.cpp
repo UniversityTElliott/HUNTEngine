@@ -42,7 +42,8 @@ namespace HUNTgame {
 
         return true;
     }
-
+    //Make a handleInput function
+    //cycle anything that has a handeinput component and call it
     void DemoGame::FixedUpdate(HUNT::Engine&, float seconds) {
         previousTime_ = currentTime_;
         currentTime_ += seconds;

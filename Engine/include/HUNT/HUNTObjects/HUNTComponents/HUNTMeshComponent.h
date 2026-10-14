@@ -13,10 +13,7 @@ namespace HUNT {
     {
     public:
         HUNTMeshComponent() = default;
-         //explicit HUNTMeshComponent(const MeshData& data)
-         //    : meshData(data)
-         //{
-         //}
+   
          ~HUNTMeshComponent() = default;
          void Init() final{
 
