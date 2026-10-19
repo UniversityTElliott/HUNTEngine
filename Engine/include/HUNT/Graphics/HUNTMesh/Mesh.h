@@ -28,10 +28,21 @@ namespace HUNT {
             meshData = data;
         }
 
+        uint32_t& getID() {
+            return identifier;
+        }
+
+
+        void setID(const uint32_t& idIn)
+        {
+                identifier = idIn;
+        }
+
     private:
 
        HUNT::MeshData meshData;
-       //maybe add an index or soemthing?
+       uint32_t identifier;
+
 
     };
 

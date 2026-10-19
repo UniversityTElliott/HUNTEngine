@@ -49,7 +49,7 @@ add_executable(HUNTGame GameApp/src/HUNTGame.cpp)
 target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
-target_link_libraries(Engine PRIVATE SDL3::SDL3)
+target_link_libraries(Engine PUBLIC SDL3::SDL3) #public for meshData maybe change?
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Game PUBLIC Engine)
 

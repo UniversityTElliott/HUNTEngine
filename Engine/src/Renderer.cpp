@@ -1,6 +1,6 @@
 
 #include <HUNT/Graphics/Renderer.h>
-#include <HUNT/Graphics/HUNTMesh/MeshData.h>
+#include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <SDL3/SDL.h>
 #include <array>
 #include <algorithm>
@@ -40,18 +40,26 @@ namespace HUNT {
         //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
 
-        std::vector<SDL_GPUBuffer*> frameVertexBuffers;
-
+        std::unordered_map<uint32_t, MeshGPUBuffers> allStoredMeshBuffers;
 
         ~Impl() { Shutdown(); }
 
         void Shutdown() noexcept {
-            //cleanup
-            //Cleanup raw pointer
-            if (gpuPipeline) {
-                SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(), gpuPipeline);
-                gpuPipeline = nullptr;
+           
+            //Cleanup for all the cached mesh buffers and their raw pointers (SDL managers so has to be raw)
+            for (auto& [meshID, buffers] : allStoredMeshBuffers)
+            {
+                if (buffers.vertexBuffer)
+                    SDL_ReleaseGPUBuffer(
+                        gpuDevice.get(), buffers.vertexBuffer);
+
+                if (buffers.indexBuffer)
+                    SDL_ReleaseGPUBuffer(
+                        gpuDevice.get(), buffers.indexBuffer);
             }
+
+            allStoredMeshBuffers.clear();
+            //Cleanup gpu pipeline stuff
             if (gpuPipeline) {
                 SDL_ReleaseGPUGraphicsPipeline(gpuDevice.get(), gpuPipeline);
                 gpuPipeline = nullptr;
@@ -74,6 +82,33 @@ namespace HUNT {
     }
     Renderer::~Renderer() = default;
 
+
+
+    MeshGPUBuffers& Renderer::GetMeshBuffers(HUNT::Mesh& meshIn)
+    {
+        auto meshData = meshIn.getMeshData();
+
+        //Attempt to get the mesh
+        auto finalMesh = impl_->allStoredMeshBuffers.find(meshIn.getID());
+        //If it exsits retun its buffers
+        if (finalMesh != impl_->allStoredMeshBuffers.end()) {
+            return finalMesh->second;
+        }
+
+        //if doesnt exsit make new buffers
+        HUNT::MeshGPUBuffers newGPUBuffers;
+        newGPUBuffers.vertexBuffer = CreateVertexBuffer(meshData.vertices);
+        newGPUBuffers.indexBuffer = CreateIndexBuffer(meshData.indices);
+        //and store them at the same ID returning the newly made buffers 
+        auto [a, b] = impl_->allStoredMeshBuffers.emplace(meshIn.getID(), std::move(newGPUBuffers));
+        //idk if its faster to return it FROM the structure or just what I made ill do this for now
+        return a->second;
+
+    }
+
+    void Renderer::clearMeshBuffers()
+    {
+    }
 
     void Renderer::SetVSync(bool enabled)
     {
@@ -395,44 +430,41 @@ namespace HUNT {
         swapchainTexture = nullptr;
     }
 
-    void Renderer::Render(HUNT::MeshData meshDataIn)
+    void Renderer::Render(HUNT::Mesh& meshIn)
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
 
-        auto& meshInVerticies = meshDataIn.vertices;
-        auto& meshInIndices = meshDataIn.indices;
+        HUNT::MeshGPUBuffers& buffer = GetMeshBuffers(meshIn);
 
         SDL_BindGPUGraphicsPipeline(impl_->renderPass,impl_->gpuPipeline);
         //Make vertex buffer using mesh and add it to the list to be culled later
-        SDL_GPUBuffer* vertexBuffer = CreateVertexBuffer(meshInVerticies);
-        impl_->frameVertexBuffers.push_back(vertexBuffer);
+        //SDL_GPUBuffer* vertexBuffer = CreateVertexBuffer(meshInVerticies);
+        //impl_->frameVertexBuffers.push_back(vertexBuffer);
+
 
         std::array vertexBufferBound{
             SDL_GPUBufferBinding{
-                .buffer = vertexBuffer,
+                .buffer = buffer.vertexBuffer,
                 .offset = 0,
             },
         };
 
         SDL_BindGPUVertexBuffers(impl_->renderPass, 0, vertexBufferBound.data(), vertexBufferBound.size()); //plural but below isnt?
         
-        if (meshInIndices.empty()) {
-            SDL_DrawGPUPrimitives(impl_->renderPass, meshInVerticies.size(), 1, 0, 0);
-            return;
-        }
-
-
-        SDL_GPUBuffer* indexBuffer = CreateIndexBuffer(meshInIndices);
-        impl_->frameVertexBuffers.push_back(indexBuffer);
+        
+       /* SDL_GPUBuffer* indexBuffer = CreateIndexBuffer(meshInIndices);
+        impl_->frameVertexBuffers.push_back(indexBuffer);*/
         std::array indexBufferBound{
            SDL_GPUBufferBinding{
-               .buffer = indexBuffer,
+               .buffer = buffer.indexBuffer,
                .offset = 0,
            },
         };
         SDL_BindGPUIndexBuffer(impl_->renderPass,indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
-        SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshInIndices.size(), 1, 0, 0, 0);
+        SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
 
+
+       // SDL_Log("%zu", impl_->allStoredMeshBuffers.size());
     }
 
 
@@ -447,18 +479,6 @@ namespace HUNT {
 
         SDL_SubmitGPUCommandBuffer(impl_->commandBuffer); //Submit to GPU.
         impl_->commandBuffer = nullptr;
-
-
-        //For each buffer release it on the GPU  CHANGE THIS LATER MAYBE REUSE?!
-        for (SDL_GPUBuffer* buffer : impl_->frameVertexBuffers)
-        {
-            if (buffer)
-            {
-                SDL_ReleaseGPUBuffer(impl_->gpuDevice.get(), buffer);
-            }
-        }
-
-        impl_->frameVertexBuffers.clear();
     }
 
 

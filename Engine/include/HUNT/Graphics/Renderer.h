@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <memory>
 #include <span>
+#include"HUNTMesh/MeshData.h"
 #include"HUNTMesh/Mesh.h"
+#include"HUNTMesh/MeshBuffers.h"
 
 
 
@@ -22,13 +24,16 @@ namespace HUNT {
         Renderer(const Renderer&) = delete;
         Renderer& operator=(const Renderer&) = delete;
 
+        MeshGPUBuffers& GetMeshBuffers(HUNT::Mesh& meshIn); //this will also make them if they dont exist
+        void clearMeshBuffers();
+
         void SetVSync(bool enabled);
         void InitGPU();
         void CreatePipeline();
         SDL_GPUBuffer* CreateVertexBuffer(std::span<Vertex>verticies);
         SDL_GPUBuffer* CreateIndexBuffer(std::span<std::uint32_t> indices);
         void BeginFrame();
-        void Render(HUNT::MeshData meshDataIn);
+        void Render(HUNT::Mesh& meshIn);
         void EndFrame();
 
 
