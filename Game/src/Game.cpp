@@ -1,3 +1,4 @@
+
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <algorithm>
@@ -43,6 +44,12 @@ namespace HUNTgame {
       
 
         return true;
+    }
+    void DemoGame::handleInput(HUNT::Engine& engine)
+    {
+
+
+
     }
     //Make a handleInput function
     //cycle anything that has a handeinput component and call it

@@ -15,6 +15,7 @@ namespace HUNTgame {
         DemoGame(std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept;
 
         bool Start(HUNT::Engine& engine) override;
+        void handleInput(HUNT::Engine& engine);
         void FixedUpdate(HUNT::Engine& engine, float seconds) override;
         void Render(HUNT::Engine& engine) override;
         void Stop(HUNT::Engine& engine) override;
