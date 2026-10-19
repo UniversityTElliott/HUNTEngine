@@ -340,6 +340,7 @@ namespace HUNT {
         if (transferBuffer == nullptr)
         {
             SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
+            return nullptr; //temporary
             
         }
 

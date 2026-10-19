@@ -36,7 +36,7 @@ namespace HUNTgame {
         triangle2.setMeshData(data2);
         previousTime_ = currentTime_ = 0.0f;
 
-       auto meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
+       auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
 
        meshComp->setMesh(triangle1);
 
