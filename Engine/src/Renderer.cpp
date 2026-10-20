@@ -218,6 +218,7 @@ namespace HUNT {
     .entrypoint = entrypoint,
     .format = format,
     .stage = stage,
+    .num_uniform_buffers = (stage == SDL_GPU_SHADERSTAGE_VERTEX) ? 1u : 0u,
         };
      SDL_Log("Loading shader: %s", shaderFilename.c_str());
      SDL_Log("  stage = %s",
