@@ -5,7 +5,8 @@
 #include <span>
 #include"HUNTMesh/MeshData.h"
 #include"HUNTMesh/Mesh.h"
-#include"HUNTMesh/MeshBuffers.h"
+#include"GPU/MeshGPUBuffers.h"
+#include"GPU/ShaderBuffers.h"
 
 
 
@@ -26,6 +27,8 @@ namespace HUNT {
 
         MeshGPUBuffers& GetMeshBuffers(HUNT::Mesh& meshIn); //this will also make them if they dont exist
         void clearMeshBuffers();
+        void SetCameraMatrix(const MatrixBufferType& matrices);
+
 
         void SetVSync(bool enabled);
         void InitGPU();

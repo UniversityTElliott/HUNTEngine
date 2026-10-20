@@ -3,10 +3,17 @@
 //https://wiki.libsdl.org/SDL3/BestKeyboardPractices
 #include <HUNT/Input/Keys.h>
 #include <array>
+#include <memory>
 namespace HUNT
 {
     class InputHandler {
     public:
+
+        InputHandler();
+        ~InputHandler();
+        //Same as renderer
+        InputHandler(const InputHandler&) = delete;
+        InputHandler& operator=(const InputHandler&) = delete;
 
         void update();
         bool isHeld(HUNT::Key key) const;
@@ -14,10 +21,9 @@ namespace HUNT
         bool wasReleased(HUNT::Key key) const;
 
     private:
+        struct Impl;
+        std::unique_ptr<Impl> impl_;
 
-        //arrays of every current and previous key and if it was pressed
-        std::array<bool, SDL_SCANCODE_COUNT> current{};
-        std::array<bool, SDL_SCANCODE_COUNT> previous{};
 
 
     };

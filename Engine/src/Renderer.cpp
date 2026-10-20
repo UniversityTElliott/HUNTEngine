@@ -1,6 +1,9 @@
 
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
+#include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
+#include <HUNT/Graphics/GPU/ShaderBuffers.h>
+
 #include <SDL3/SDL.h>
 #include <array>
 #include <algorithm>
@@ -34,12 +37,17 @@ namespace HUNT {
 
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
-        //SDL manages these so raw is OK
+        //SDL manages these so raw is OK???
         SDL_GPURenderPass* renderPass = nullptr;
         SDL_GPUCommandBuffer* commandBuffer = nullptr;
         //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
-
+        SDL_GPUTexture* swapchainTexture = nullptr;
+        HUNT::MatrixBufferType cameraMatrix{
+        .world = HUNT::mat4(1.f),
+        .view = HUNT::mat4(1.f),
+        .projection = HUNT::mat4(1.f),
+        };
         std::unordered_map<uint32_t, MeshGPUBuffers> allStoredMeshBuffers;
 
         ~Impl() { Shutdown(); }
@@ -108,6 +116,11 @@ namespace HUNT {
 
     void Renderer::clearMeshBuffers()
     {
+    }
+
+    void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
+    {
+        impl_->cameraMatrix = matrices;
     }
 
     void Renderer::SetVSync(bool enabled)
@@ -413,27 +426,34 @@ namespace HUNT {
     {
         //Make command buffer and swapchain texture
         impl_->commandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
-        SDL_GPUTexture* swapchainTexture;
+        
 
-        if (!impl_->commandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->commandBuffer, impl_->window, &swapchainTexture, nullptr, nullptr))
+        if (!impl_->commandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->commandBuffer, impl_->window, &impl_->swapchainTexture, nullptr, nullptr))
         {
             // Explode
         }
 
         SDL_GPUColorTargetInfo colorTargetInfo = {};
-        colorTargetInfo.texture = swapchainTexture;
+        colorTargetInfo.texture = impl_->swapchainTexture;
         colorTargetInfo.clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w};
         colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
         colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
 
         impl_->renderPass = (SDL_BeginGPURenderPass(impl_->commandBuffer, &colorTargetInfo, 1, nullptr)); //Begin Render Pass.
-        swapchainTexture = nullptr;
+    
     }
 
     void Renderer::Render(HUNT::Mesh& meshIn)
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
+        if (impl_->renderPass == nullptr ||
+            impl_->commandBuffer == nullptr ||
+            impl_->gpuPipeline == nullptr)
+        {
+            return;
+        }
+
 
         HUNT::MeshGPUBuffers& buffer = GetMeshBuffers(meshIn);
 
@@ -462,6 +482,9 @@ namespace HUNT {
            },
         };
         SDL_BindGPUIndexBuffer(impl_->renderPass,indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
+
+       // SDL_PushGPUVertexUniformData(impl_->commandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
+
         SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
 
 
@@ -480,6 +503,8 @@ namespace HUNT {
 
         SDL_SubmitGPUCommandBuffer(impl_->commandBuffer); //Submit to GPU.
         impl_->commandBuffer = nullptr;
+
+        impl_->swapchainTexture = nullptr;
     }
 
 
