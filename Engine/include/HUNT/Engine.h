@@ -8,6 +8,7 @@ namespace HUNT {
 
     class Renderer;
     class Engine;
+    class InputHandler;
     // Application is what the end developer builds to use your engine.
     // Its lifetime is managed by the engine. The end developer respondes to the calls to Start, Render, etc
     class Application {
@@ -15,6 +16,7 @@ namespace HUNT {
         virtual ~Application() = default;
         virtual bool Start(Engine& engine) = 0;
         virtual void FixedUpdate(Engine& engine, float dt) = 0;
+        virtual void HandleInput(Engine& engine) = 0;
         virtual void Render(Engine& engine) = 0;
         virtual void Stop(Engine& engine) = 0;
     };
@@ -36,6 +38,7 @@ namespace HUNT {
         void    Quit() noexcept;
 
         Renderer& GetRenderer();
+        InputHandler& GetInput();
 
     private:
 		// The specifics of our engine implementation are hidden in Impl. 

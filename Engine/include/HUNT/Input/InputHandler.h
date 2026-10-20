@@ -1,20 +1,24 @@
 #pragma once
 
-
-#include <Engine/include/HUNT/Input/Keys.h>
+//https://wiki.libsdl.org/SDL3/BestKeyboardPractices
+#include <HUNT/Input/Keys.h>
 #include <array>
+namespace HUNT
+{
+    class InputHandler {
+    public:
 
-class Input {
-public:
-    bool isHeld(HUNT::Key key) const;
-    bool wasPressed(HUNT::Key key) const;
-    bool wasReleased(HUNT::Key key) const;
+        void update();
+        bool isHeld(HUNT::Key key) const;
+        bool wasPressed(HUNT::Key key) const;
+        bool wasReleased(HUNT::Key key) const;
 
-private:
-    
-    //Temp 256 find a good way to set this
-    std::array<bool, 256> current{};
-    std::array<bool, 256> previous{};
-    
-    
-};
+    private:
+
+        //arrays of every current and previous key and if it was pressed
+        std::array<bool, SDL_SCANCODE_COUNT> current{};
+        std::array<bool, SDL_SCANCODE_COUNT> previous{};
+
+
+    };
+}

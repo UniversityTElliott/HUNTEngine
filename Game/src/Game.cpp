@@ -1,9 +1,11 @@
 
+
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
+#include <HUNT/Input/InputHandler.h>
 #include <algorithm>
 #include <cmath>
-
+#include <SDL3/SDL_log.h> //FOR TESTING
 namespace HUNTgame {
 
     DemoGame::DemoGame(std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept
@@ -45,18 +47,25 @@ namespace HUNTgame {
 
         return true;
     }
-    void DemoGame::handleInput(HUNT::Engine& engine)
-    {
-
-
-
-    }
+  
     //Make a handleInput function
     //cycle anything that has a handeinput component and call it
     void DemoGame::FixedUpdate(HUNT::Engine&, float seconds) {
         previousTime_ = currentTime_;
         currentTime_ += seconds;
         
+    }
+
+    void DemoGame::HandleInput(HUNT::Engine& engine)
+    {
+        auto& input = engine.GetInput();
+
+        input.update();
+
+        if (input.wasPressed(HUNT::key::w)) {
+            SDL_Log("Key is pressed");
+        }
+
     }
 
     void DemoGame::Render(HUNT::Engine& engine) {

@@ -1,6 +1,7 @@
 ﻿
 #include <HUNT/Engine.h>
 #include <HUNT/Graphics/Renderer.h>
+#include <HUNT/Input/InputHandler.h>
 
 #include <SDL3/SDL.h>
 
@@ -27,6 +28,7 @@ namespace HUNT {
 
         std::unique_ptr<SDL_Window, WindowDeleter> window;
         std::unique_ptr<Renderer> renderer;
+        std::unique_ptr<InputHandler> inputHandler;
 
         bool sdlInitialised = false;
         bool quit = false;
@@ -81,6 +83,8 @@ namespace HUNT {
         }
 
         impl_->renderer->SetVSync(true);
+        //make input handler
+        impl_->inputHandler = std::make_unique<InputHandler>();
         return true;
     }
 
@@ -115,6 +119,8 @@ namespace HUNT {
                 }
                 if (impl_->quit) break;
 
+                //TODO: ADD ERROR CHECKS HERE MAYBE
+                application.HandleInput(*this);
                 application.Render(*this);
 
             
@@ -146,6 +152,9 @@ namespace HUNT {
     {
         return *impl_->renderer;
     }
-
+    InputHandler& Engine::GetInput()
+    {
+        return *impl_->inputHandler;
+    }
    
 }
