@@ -99,23 +99,14 @@ namespace HUNTgame {
     void DemoGame::Render(HUNT::Engine& engine) {
         auto& renderer = engine.GetRenderer();
         
-        myCamera.update(); //MOVE THIS !!!
-        HUNT::MatrixBufferType matrices{
-          .world = HUNT::mat4(1.f),
-          .view = myCamera.getViewMatrix(),
-          .projection = HUNT::perspectiveLH(
-        HUNT::toRadians(90.f),1080.f / 720.f,0.1f,200.f)
-        };
+        HUNT::MatrixBufferType matrices = HUNT::makeGPUMatrix(HUNT::mat4(1.f), myCamera.getViewMatrix(), HUNT::perspectiveLH(HUNT::toRadians(90.f), 1080.f / 720.f, 0.1f, 200.f));
 
         renderer.SetCameraMatrix(matrices);
 
         renderer.BeginFrame();
         
         triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
+
 
         renderer.EndFrame();
 
