@@ -4,6 +4,8 @@
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
 #include <HUNT/Graphics/GPU/ShaderBuffers.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <SDL3/SDL.h>
 #include <array>
 #include <algorithm>
@@ -46,9 +48,12 @@ namespace HUNT {
         HUNT::MatrixBufferType cameraMatrix{
         .world = HUNT::mat4(1.f),
         .view = HUNT::mat4(1.f),
-        .projection = HUNT::mat4(1.f),
+        .projection = glm::perspective(90.f,1080.f/720.f,0.1f,200.f), //BUILD THIS FROM PASSED IN DATA
         };
         std::unordered_map<uint32_t, MeshGPUBuffers> allStoredMeshBuffers;
+
+     
+
 
         ~Impl() { Shutdown(); }
 

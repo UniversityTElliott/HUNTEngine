@@ -4,6 +4,7 @@
 #include <SDL3/SDL_keyboard.h>
 #include <memory>
 
+
 namespace HUNT
 {
 	//maybe use smaller data types int is kinda big for this?
@@ -25,7 +26,7 @@ namespace HUNT
     {*/
 
 	InputHandler::~InputHandler() = default;
-	
+
 
 	void InputHandler::update()
 	{

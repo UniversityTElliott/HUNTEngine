@@ -39,6 +39,8 @@ add_library(Engine STATIC
     Engine/src/Renderer.cpp
     "Engine/src/InputHandler.cpp"
     "Engine/include/HUNT/Input/InputHandler.h"
+    "Engine/src/Camera.cpp"
+    "Engine/include/HUNT/Camera/Camera.h"
     "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h"
 )
 
