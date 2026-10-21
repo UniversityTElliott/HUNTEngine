@@ -3,6 +3,7 @@
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
+#include <HUNT/HUNTMath/mathFunctions.h>
 #include <algorithm>
 #include <cmath>
 #include <SDL3/SDL_log.h> //FOR TESTING
@@ -17,60 +18,97 @@ namespace HUNTgame {
 
         renderer.InitGPU();
         HUNT::MeshData data1;
+        //CUBE!
         data1.vertices = std::vector<HUNT::Vertex>{
-            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, 0.f), HUNT::float4(1.f, 0.f, 1.f, 1.f))
+            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, -0.5f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 0.f, 1.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, -0.5f), HUNT::float4(1.f, 0.f, 1.f, 1.f)),
 
+            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, 0.5f), HUNT::float4(1.f, 1.f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, 0.5f), HUNT::float4(0.f, 1.f, 1.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.5f), HUNT::float4(1.f, 0.5f, 0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, 0.5f), HUNT::float4(1.f, 1.f, 1.f, 1.f))
         };
+        //Counter clockwise order like cmp203
         data1.indices = std::vector<uint32_t>{
-            0, 1, 2, 0, 2, 3
+         0, 1, 2, 0, 2, 3,
+         4, 6, 5, 4, 7, 6,
+         4, 5, 1, 4, 1, 0,
+         3, 2, 6, 3, 6, 7,
+         4, 0, 3, 4, 3, 7,
+         1, 5, 6, 1, 6, 2
         };
-        HUNT::MeshData data2;
-        data2.vertices = std::vector<HUNT::Vertex>{
-            HUNT::Vertex(HUNT::float3(0.5f, 0.f, 0.f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(1.f, -0.5f, 0.f), HUNT::float4(0.f, 0.f, 1.f, 1.f))
-        };
-
         triangle1.setMeshData(data1);
         triangle1.setID(1);
-        triangle2.setMeshData(data2);
-        previousTime_ = currentTime_ = 0.0f;
 
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
 
        meshComp->setMesh(triangle1);
 
       
+       myCamera.setPosition(0.f, 0.f, -10.f);
+       myCamera.setRotation(0.f, 0.f, 0.f);
 
+        previousTime_ = currentTime_ = 0.0f;
         return true;
     }
   
     //Make a handleInput function
     //cycle anything that has a handeinput component and call it
-    void DemoGame::FixedUpdate(HUNT::Engine&, float seconds) {
+    void DemoGame::FixedUpdate(HUNT::Engine& engine, float seconds) {
         previousTime_ = currentTime_;
         currentTime_ += seconds;
+        float speed = 0.2f;
         
-    }
-
-    void DemoGame::HandleInput(HUNT::Engine& engine)
-    {
         auto& input = engine.GetInput();
 
         input.update();
 
-        if (input.wasPressed(HUNT::key::w)) {
-            SDL_Log("Key is pressed");
+        //Position
+        HUNT::float3 position = myCamera.getPosition();
+        if (input.isHeld(HUNT::key::w)) {
+            position.z += speed;
         }
+        if (input.isHeld(HUNT::key::s)) {
+            position.z -= speed;
+        }
+        if (input.isHeld(HUNT::key::a)) {
+            position.x -= speed;
+        }
+        if (input.isHeld(HUNT::key::d)) {
+            position.x += speed;
+        }
+        if (input.isHeld(HUNT::key::space)) {
+            position.y += speed;
+        }
+        if (input.isHeld(HUNT::key::left_shift)) {
+            position.y -= speed;
+        }
+        myCamera.setPosition(position);
 
+        //Rotate
+
+    }
+
+    void DemoGame::HandleInput(HUNT::Engine& engine)
+    {
+      
     }
 
     void DemoGame::Render(HUNT::Engine& engine) {
         auto& renderer = engine.GetRenderer();
         
+        myCamera.update(); //MOVE THIS !!!
+        HUNT::MatrixBufferType matrices{
+          .world = HUNT::mat4(1.f),
+          .view = myCamera.getViewMatrix(),
+          .projection = HUNT::perspectiveLH(
+        HUNT::toRadians(90.f),1080.f / 720.f,0.1f,200.f)
+        };
+
+        renderer.SetCameraMatrix(matrices);
+
         renderer.BeginFrame();
         
         triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);

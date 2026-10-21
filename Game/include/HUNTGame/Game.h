@@ -3,6 +3,7 @@
 #include <HUNT/Engine.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/HUNTObjects/HUNTObject.h>
+#include <HUNT/Camera/Camera.h>
 #include <HUNT/HUNTObjects/HUNTComponents/HUNTMeshComponent.h>
 
 #include <cstdint>
@@ -26,6 +27,8 @@ namespace HUNTgame {
         HUNT::Mesh triangle2;
 
         HUNT::HUNTObject triangle3;
+
+        HUNT::Camera myCamera;
 
         std::uint8_t red_;
         std::uint8_t green_;

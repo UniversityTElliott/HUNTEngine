@@ -23,10 +23,12 @@ struct Output
 Output main(Input input)
 {
     Output output;
-    float4 position = float4(input.position, 1.f);
-    position = mul(position, worldMatrix);
-    position = mul(position, viewMatrix);
-    position = mul(position, projectionMatrix);
+
+    float4 position = float4(input.position, 1.0f);
+    //Opposite to erins examples? idk why
+    position = mul(worldMatrix, position);
+    position = mul(viewMatrix, position);
+    position = mul(projectionMatrix, position); 
 
     output.position = position;
     output.colour = input.colour;

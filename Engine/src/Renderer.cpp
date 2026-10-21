@@ -310,6 +310,8 @@ namespace HUNT {
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST, //Allow this to change
         .rasterizer_state = SDL_GPURasterizerState{
             .fill_mode = SDL_GPU_FILLMODE_FILL,
+            .cull_mode = SDL_GPU_CULLMODE_BACK,
+            .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = colorTargetDescriptions.data(),
@@ -489,7 +491,7 @@ namespace HUNT {
         };
         SDL_BindGPUIndexBuffer(impl_->renderPass,indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
 
-       // SDL_PushGPUVertexUniformData(impl_->commandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
+        SDL_PushGPUVertexUniformData(impl_->commandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
 
         SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
 
