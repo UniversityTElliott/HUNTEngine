@@ -7,7 +7,8 @@
 #include"HUNTMesh/Mesh.h"
 #include"GPU/MeshGPUBuffers.h"
 #include"GPU/ShaderBuffers.h"
-
+//https://gpuforbeginners.com/
+//https://github.com/TheSpydog/SDL_gpu_examples/blob/main/Examples/TexturedQuad.c
 
 
 struct SDL_Window;

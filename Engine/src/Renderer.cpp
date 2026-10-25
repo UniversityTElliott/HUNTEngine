@@ -1,4 +1,6 @@
 
+
+
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
@@ -7,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <array>
 #include <algorithm>
 #include <chrono>

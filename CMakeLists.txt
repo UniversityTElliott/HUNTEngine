@@ -15,6 +15,17 @@ set(SDL_TEST_LIBRARY OFF CACHE BOOL "Do not build SDL3 test support" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "Do not build SDL3 tests" FORCE)
 set(SDL_EXAMPLES OFF CACHE BOOL "Do not build SDL3 examples" FORCE)
 
+#SDL image
+# Disable formats we don't need
+set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF" FORCE)
+set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WebP" FORCE)
+set(SDLIMAGE_TIF OFF CACHE BOOL "Disable TIFF" FORCE)
+set(SDLIMAGE_JXL OFF CACHE BOOL "Disable JPEG XL" FORCE)
+set(SDLIMAGE_HEIF OFF CACHE BOOL "Disable HEIF" FORCE)
+#GLM
+set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLM_BUILD_LIBRARY OFF CACHE BOOL "" FORCE)
+
 # FetchContent will download SDL3 from the specified Git repository and tag, and make it available for linking in our project.
 # Give it a meaningful name, tell us where to find it and which version, and don’t get the full commit history
 FetchContent_Declare(SDL3
@@ -24,6 +35,14 @@ FetchContent_Declare(SDL3
 )
 
 FetchContent_MakeAvailable(SDL3)
+
+FetchContent_Declare(SDL3_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG release-3.4.4
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(SDL3_image)
 
 FetchContent_Declare(glm
 	GIT_REPOSITORY https://github.com/g-truc/glm.git
@@ -55,6 +74,7 @@ target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
 target_link_libraries(Engine PUBLIC SDL3::SDL3) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
+target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Game PUBLIC Engine)
 

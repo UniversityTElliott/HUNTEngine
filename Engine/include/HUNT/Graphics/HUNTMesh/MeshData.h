@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include <HUNT/HUNTMath/float2.h>
 #include <HUNT/HUNTMath/float3.h>
 #include <HUNT/HUNTMath/float4.h>
 
@@ -14,6 +15,8 @@ namespace HUNT {
 	{
 		HUNT::float3 position;
 		HUNT::float4 colour;
+		HUNT::float2 UV;
+		HUNT::float3 normal;
 
 	};
 
