@@ -5,6 +5,7 @@
 #include <span>
 #include"HUNTMesh/MeshData.h"
 #include"HUNTMesh/Mesh.h"
+#include "HUNT/Graphics/HUNTMesh/Texture.h"
 #include"GPU/MeshGPUBuffers.h"
 #include"GPU/ShaderBuffers.h"
 //https://gpuforbeginners.com/
@@ -13,8 +14,6 @@
 
 struct SDL_Window;
 struct SDL_GPUBuffer;
-
-
 
 namespace HUNT {
 
@@ -36,12 +35,20 @@ namespace HUNT {
         void CreatePipeline();
         SDL_GPUBuffer* CreateVertexBuffer(std::span<Vertex>verticies);
         SDL_GPUBuffer* CreateIndexBuffer(std::span<std::uint32_t> indices);
+        HUNT::Texture* LoadTexture(const char* filePath);
+
         void BeginFrame();
         void Render(HUNT::Mesh& meshIn);
         void EndFrame();
 
 
         //add set bg cvolour
+
+         //CURRENT PLAN FOR TEXTURE
+        //MAKE A LOADTEX FUNCTION IN THE RENDERER THAT TAKES IN A FILE PATH
+        //IT USES IMG_LoadGPUTexture() AND ADDS THE TEXTURE TO A MAP? OF THEM
+        //RETURNS A COPY OF THE POINTER TO THIS
+        //MAYBE ADD the zip bullshit
 
     private:
         struct Impl;

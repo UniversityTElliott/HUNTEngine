@@ -12,12 +12,14 @@ struct Input
 {
     float3 position : TEXCOORD0;
     float4 colour : TEXCOORD1;
+    float2 UV : TEXCOORD2;
 };
 
 struct Output
 {
     float4 position : SV_Position;
     float4 colour : TEXCOORD0;
+    float2 UV : TEXCOORD2;
 };
 
 Output main(Input input)
@@ -32,6 +34,7 @@ Output main(Input input)
 
     output.position = position;
     output.colour = input.colour;
+    output.UV = input.UV;
 
     return output;
 }

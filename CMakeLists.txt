@@ -32,6 +32,7 @@ FetchContent_Declare(SDL3
 	GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
 	GIT_TAG release-3.4.18
 	GIT_SHALLOW TRUE
+
 )
 
 FetchContent_MakeAvailable(SDL3)
@@ -87,6 +88,10 @@ if(WIN32)
 add_custom_target(StageRuntime
 COMMAND ${CMAKE_COMMAND} -E copy_if_different
 $<TARGET_FILE:SDL3::SDL3> $<TARGET_FILE_DIR:HUNTGame>
+
+COMMAND ${CMAKE_COMMAND} -E copy_if_different
+$<TARGET_FILE:SDL3_image::SDL3_image-shared> $<TARGET_FILE_DIR:HUNTGame>
+
 VERBATIM)
 add_dependencies(HUNTGame StageRuntime)
 add_dependencies(EditorApp StageRuntime)

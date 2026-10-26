@@ -1,6 +1,10 @@
+Texture2D HUNTTexture : register(t0, space2);
+SamplerState HUNTSampler : register(s0, space2);
+
 struct Input
 {
     float4 Colour : TEXCOORD0;
+    float2 UV : TEXCOORD1;
 };
 
 struct Output
@@ -11,7 +15,10 @@ struct Output
 Output main(Input input)
 {
     Output output;
-    output.Colour = input.Colour;
+    
+    float4 texColor = HUNTTexture.Sample(HUNTSampler, input.UV);
+    
+    output.Colour = texColor * input.Colour;
 
     return output;
 }

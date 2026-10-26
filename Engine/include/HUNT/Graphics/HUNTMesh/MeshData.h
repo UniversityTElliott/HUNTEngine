@@ -18,7 +18,7 @@ namespace HUNT {
 		HUNT::float3 position;
 		HUNT::float4 colour;
 		HUNT::float2 UV;
-		HUNT::float3 normal;
+		//HUNT::float3 normal;
 
 	};
 

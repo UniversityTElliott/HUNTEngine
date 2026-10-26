@@ -20,32 +20,47 @@ namespace HUNTgame {
         HUNT::MeshData data1;
         //CUBE!
         data1.vertices = std::vector<HUNT::Vertex>{
-            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, -0.5f), HUNT::float4(1.f, 0.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 1.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 0.f, 1.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, -0.5f), HUNT::float4(1.f, 0.f, 1.f, 1.f)),
+            // Back face (-Z)
+            HUNT::Vertex(HUNT::float3(-0.5f,  0.5f, -0.5f), HUNT::float4(1.f, 0.f, 0.f, 1.f), HUNT::float2(0.f, 0.f)),
+            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 1.f, 0.f, 1.f), HUNT::float2(0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 0.f, 1.f, 1.f), HUNT::float2(1.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f,  0.5f, -0.5f), HUNT::float4(1.f, 0.f, 1.f, 1.f), HUNT::float2(1.f, 0.f)),
 
-            HUNT::Vertex(HUNT::float3(-0.5f, 0.5f, 0.5f), HUNT::float4(1.f, 1.f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, 0.5f), HUNT::float4(0.f, 1.f, 1.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, 0.5f), HUNT::float4(1.f, 0.5f, 0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, 0.5f, 0.5f), HUNT::float4(1.f, 1.f, 1.f, 1.f))
+            // Front face (+Z)
+            HUNT::Vertex(HUNT::float3(-0.5f,  0.5f,  0.5f), HUNT::float4(1.f, 1.f, 0.f, 1.f), HUNT::float2(0.f, 0.f)),
+            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f,  0.5f), HUNT::float4(0.f, 1.f, 1.f, 1.f), HUNT::float2(0.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f, -0.5f,  0.5f), HUNT::float4(1.f, 0.5f, 0.f, 1.f), HUNT::float2(1.f, 1.f)),
+            HUNT::Vertex(HUNT::float3(0.5f,  0.5f,  0.5f), HUNT::float4(1.f, 1.f, 1.f, 1.f), HUNT::float2(1.f, 0.f))
         };
-        //Counter clockwise order like cmp203
+
+        // Counter-clockwise order like CMP203
         data1.indices = std::vector<uint32_t>{
-         0, 1, 2, 0, 2, 3,
-         4, 6, 5, 4, 7, 6,
-         4, 5, 1, 4, 1, 0,
-         3, 2, 6, 3, 6, 7,
-         4, 0, 3, 4, 3, 7,
-         1, 5, 6, 1, 6, 2
+            0, 1, 2, 0, 2, 3,
+            4, 6, 5, 4, 7, 6,
+            4, 5, 1, 4, 1, 0,
+            3, 2, 6, 3, 6, 7,
+            4, 0, 3, 4, 3, 7,
+            1, 5, 6, 1, 6, 2
         };
         triangle1.setMeshData(data1);
         triangle1.setID(1);
+
+    
+
+
+        HUNT::Texture* bunnyTex = renderer.LoadTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png");
+
+       HUNT::Material bunnyMat;
+       bunnyMat.SetTexture(bunnyTex);
+       triangle1.SetMaterial(bunnyMat);
+
 
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
 
        meshComp->setMesh(triangle1);
 
+       //THIS IS ALL A TEST
+       
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);

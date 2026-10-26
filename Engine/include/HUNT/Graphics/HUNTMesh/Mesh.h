@@ -39,11 +39,11 @@ namespace HUNT {
                 identifier = idIn;
         }
 
-        void SetMaterial(HUNT::Material* material)
+        void SetMaterial(HUNT::Material material)
         {
             meshMaterial = material;
         }
-        HUNT::Material* GetMaterial() 
+        HUNT::Material GetMaterial() 
         {
             return meshMaterial;
         }
@@ -53,7 +53,7 @@ namespace HUNT {
 
        HUNT::MeshData meshData;
        uint32_t identifier;
-       HUNT::Material* meshMaterial = nullptr; //change later idk if I want the mesh to own the material or the renderer
+       HUNT::Material meshMaterial; //change later idk if I want the mesh to own the material or the renderer
 
     };
 
