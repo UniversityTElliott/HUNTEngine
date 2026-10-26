@@ -11,6 +11,8 @@
 
 namespace HUNT {
 
+
+
 	struct Vertex
 	{
 		HUNT::float3 position;
@@ -31,5 +33,6 @@ namespace HUNT {
 
 		
 	};
+
 }
 

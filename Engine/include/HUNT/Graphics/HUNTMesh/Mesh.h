@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include <HUNT/Graphics/HUNTMesh/MeshData.h>
+#include <HUNT/Graphics/HUNTMesh/Material.h>
 
 namespace HUNT {
 
@@ -38,11 +39,21 @@ namespace HUNT {
                 identifier = idIn;
         }
 
+        void SetMaterial(HUNT::Material* material)
+        {
+            meshMaterial = material;
+        }
+        HUNT::Material* GetMaterial() 
+        {
+            return meshMaterial;
+        }
+
+
     private:
 
        HUNT::MeshData meshData;
        uint32_t identifier;
-
+       HUNT::Material* meshMaterial = nullptr; //change later idk if I want the mesh to own the material or the renderer
 
     };
 
