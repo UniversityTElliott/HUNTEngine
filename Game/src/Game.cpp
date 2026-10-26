@@ -46,7 +46,7 @@ namespace HUNTgame {
         triangle1.setID(1);
 
     
-
+        //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
         HUNT::Texture* bunnyTex = renderer.LoadTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png");
 
