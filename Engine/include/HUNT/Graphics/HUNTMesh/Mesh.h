@@ -52,7 +52,7 @@ namespace HUNT {
     private:
 
        HUNT::MeshData meshData;
-       uint32_t identifier;
+       uint32_t identifier = 0;
        HUNT::Material meshMaterial; //change later idk if I want the mesh to own the material or the renderer
 
     };

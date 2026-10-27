@@ -18,7 +18,7 @@ namespace HUNTgame {
 
         renderer.InitGPU();
 
-        renderer.LoadTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png");
+        renderer.LoadTexture("TestAssets/bunny.png");
 
 
 
@@ -54,7 +54,7 @@ namespace HUNTgame {
          
 
        HUNT::Material bunnyMat;
-       bunnyMat.SetTexture(renderer.GetLoadedTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png"));
+       bunnyMat.SetTexture(renderer.GetLoadedTexture("TestAssets/bunny.png"));
 
        //Set it all for the example
         triangle1.setMeshData(data1);

@@ -17,14 +17,23 @@ set(SDL_EXAMPLES OFF CACHE BOOL "Do not build SDL3 examples" FORCE)
 
 #SDL image
 # Disable formats we don't need
+set(SDLIMAGE_VENDORED OFF CACHE BOOL "Disable zLib" FORCE)
 set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WebP" FORCE)
 set(SDLIMAGE_TIF OFF CACHE BOOL "Disable TIFF" FORCE)
 set(SDLIMAGE_JXL OFF CACHE BOOL "Disable JPEG XL" FORCE)
 set(SDLIMAGE_HEIF OFF CACHE BOOL "Disable HEIF" FORCE)
+#ASsimp
+SET(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+SET(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+SET(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+SET(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+SET(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
 #GLM
 set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLM_BUILD_LIBRARY OFF CACHE BOOL "" FORCE)
+set(GLM_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
 
 # FetchContent will download SDL3 from the specified Git repository and tag, and make it available for linking in our project.
 # Give it a meaningful name, tell us where to find it and which version, and don’t get the full commit history
@@ -45,6 +54,15 @@ FetchContent_Declare(SDL3_image
 
 FetchContent_MakeAvailable(SDL3_image)
 
+FetchContent_Declare(
+    Assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG v6.0.5
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(Assimp)
+
 FetchContent_Declare(glm
 	GIT_REPOSITORY https://github.com/g-truc/glm.git
 	GIT_TAG 1.0.2
@@ -52,6 +70,9 @@ FetchContent_Declare(glm
 )
 
 FetchContent_MakeAvailable(glm)
+
+
+
 #Custom Engine stuff below
 #Librarys is basically anything that has a header file
 add_library(Engine STATIC
@@ -74,8 +95,9 @@ add_executable(HUNTGame GameApp/src/HUNTGame.cpp)
 target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
-target_link_libraries(Engine PUBLIC SDL3::SDL3) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
+target_link_libraries(Engine PRIVATE SDL3::SDL3) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
 target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
+target_link_libraries(Engine PRIVATE  assimp::assimp) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Game PUBLIC Engine)
 
@@ -92,6 +114,12 @@ $<TARGET_FILE:SDL3::SDL3> $<TARGET_FILE_DIR:HUNTGame>
 COMMAND ${CMAKE_COMMAND} -E copy_if_different
 $<TARGET_FILE:SDL3_image::SDL3_image-shared> $<TARGET_FILE_DIR:HUNTGame>
 
+COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:assimp::assimp> $<TARGET_FILE_DIR:HUNTGame>
+
+#Do some ZIP trickery here below
+   COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/Game/TestAssets" "$<TARGET_FILE_DIR:HUNTGame>/TestAssets"
 VERBATIM)
 add_dependencies(HUNTGame StageRuntime)
 add_dependencies(EditorApp StageRuntime)
