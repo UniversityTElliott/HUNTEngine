@@ -17,6 +17,11 @@ namespace HUNTgame {
         auto& renderer = engine.GetRenderer();
 
         renderer.InitGPU();
+
+        renderer.LoadTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png");
+
+
+
         HUNT::MeshData data1;
         //CUBE!
         data1.vertices = std::vector<HUNT::Vertex>{
@@ -42,16 +47,18 @@ namespace HUNTgame {
             4, 0, 3, 4, 3, 7,
             1, 5, 6, 1, 6, 2
         };
-        triangle1.setMeshData(data1);
-        triangle1.setID(1);
 
     
         //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
-        HUNT::Texture* bunnyTex = renderer.LoadTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png");
+         
 
        HUNT::Material bunnyMat;
-       bunnyMat.SetTexture(bunnyTex);
+       bunnyMat.SetTexture(renderer.GetLoadedTexture("C:/Users/tomca/Source/Repos/HUNTEngine/Game/TestAssets/bunny.png"));
+
+       //Set it all for the example
+        triangle1.setMeshData(data1);
+        triangle1.setID(1);
        triangle1.SetMaterial(bunnyMat);
 
 

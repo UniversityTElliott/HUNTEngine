@@ -24,31 +24,27 @@ namespace HUNT {
 
         Renderer(const Renderer&) = delete;
         Renderer& operator=(const Renderer&) = delete;
-
-        MeshGPUBuffers& GetMeshBuffers(HUNT::Mesh& meshIn); //this will also make them if they dont exist
-        void clearMeshBuffers();
-        void SetCameraMatrix(const MatrixBufferType& matrices);
-
-
-        void SetVSync(bool enabled);
+        //Initialisers
         void InitGPU();
         void CreatePipeline();
+        void CreateSampler();
+
+        //Camera Stuff
+        void SetCameraMatrix(const MatrixBufferType& matrices);
+        void SetVSync(bool enabled);
+        //Mesh stuff
+        MeshGPUBuffers& GetMeshBuffers(HUNT::Mesh& meshIn); //this will also make them if they dont exist
         SDL_GPUBuffer* CreateVertexBuffer(std::span<Vertex>verticies);
         SDL_GPUBuffer* CreateIndexBuffer(std::span<std::uint32_t> indices);
-        HUNT::Texture* LoadTexture(const char* filePath);
+        void clearMeshBuffers();
+        //Texture Stuff
+        void LoadTexture(const char* filePath);
+        HUNT::Texture* GetLoadedTexture(const char* filePath);
 
+        //Rendering block
         void BeginFrame();
         void Render(HUNT::Mesh& meshIn);
         void EndFrame();
-
-
-        //add set bg cvolour
-
-         //CURRENT PLAN FOR TEXTURE
-        //MAKE A LOADTEX FUNCTION IN THE RENDERER THAT TAKES IN A FILE PATH
-        //IT USES IMG_LoadGPUTexture() AND ADDS THE TEXTURE TO A MAP? OF THEM
-        //RETURNS A COPY OF THE POINTER TO THIS
-        //MAYBE ADD the zip bullshit
 
     private:
         struct Impl;

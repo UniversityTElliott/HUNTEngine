@@ -1,6 +1,3 @@
-
-
-
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
@@ -44,10 +41,10 @@ namespace HUNT {
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
         //SDL manages these so raw is OK???
         SDL_GPURenderPass* renderPass = nullptr;
-        SDL_GPUCommandBuffer* commandBuffer = nullptr;
+        SDL_GPUCommandBuffer* renderCommandBuffer = nullptr;
+   
         //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
-        SDL_GPUTexture* swapchainTexture = nullptr;
         SDL_GPUSampler* textureSampler = nullptr;
         HUNT::MatrixBufferType cameraMatrix{
         .world = HUNT::mat4(1.f),
@@ -121,42 +118,7 @@ namespace HUNT {
     Renderer::~Renderer() = default;
 
 
-
-    MeshGPUBuffers& Renderer::GetMeshBuffers(HUNT::Mesh& meshIn)
-    {
-        auto meshData = meshIn.getMeshData();
-
-        //Attempt to get the mesh
-        auto finalMesh = impl_->allStoredMeshBuffers.find(meshIn.getID());
-        //If it exsits retun its buffers
-        if (finalMesh != impl_->allStoredMeshBuffers.end()) {
-            return finalMesh->second;
-        }
-
-        //if doesnt exsit make new buffers
-        HUNT::MeshGPUBuffers newGPUBuffers;
-        newGPUBuffers.vertexBuffer = CreateVertexBuffer(meshData.vertices);
-        newGPUBuffers.indexBuffer = CreateIndexBuffer(meshData.indices);
-        //and store them at the same ID returning the newly made buffers 
-        auto [a, b] = impl_->allStoredMeshBuffers.emplace(meshIn.getID(), std::move(newGPUBuffers));
-        //idk if its faster to return it FROM the structure or just what I made ill do this for now
-        return a->second;
-
-    }
-
-    void Renderer::clearMeshBuffers()
-    {
-    }
-
-    void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
-    {
-        impl_->cameraMatrix = matrices;
-    }
-
-    void Renderer::SetVSync(bool enabled)
-    {
-        SDL_SetRenderVSync(impl_->renderer3D.get(), enabled);
-    }
+    //---------------------INITIALISE------------------------------------------------
     void Renderer::InitGPU()
     {
         //CREATES GPU DEVICE
@@ -177,30 +139,13 @@ namespace HUNT {
         }
 
         CreatePipeline();
-
-        //PUT IN OWN FUNCTON ALSO ADD FLAGS OR SUMMUIN
-        SDL_GPUSamplerCreateInfo samplerInfo{};
-        samplerInfo.min_filter = SDL_GPU_FILTER_LINEAR;
-        samplerInfo.mag_filter = SDL_GPU_FILTER_LINEAR;
-        samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
-        samplerInfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
-        samplerInfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
-        samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
-
-        impl_->textureSampler = SDL_CreateGPUSampler(impl_->gpuDevice.get(), &samplerInfo);
-
-        if (!impl_->textureSampler)
-        {
-            SDL_Log("Failed to create texture sampler: %s", SDL_GetError());
-            return;
-        }
+        CreateSampler();
+        
     }
-
-
-    //Helper function to load shaders
+    //Helper function for the pipeline creation, makes
     SDL_GPUShader* LoadShader(SDL_GPUDevice* device, const std::string& shaderFilename) {
 
-        
+
         //Find out which stage it is
         SDL_GPUShaderStage stage;
         if (shaderFilename.find(".vert") != std::string::npos)
@@ -216,7 +161,7 @@ namespace HUNT {
             SDL_Log("Couldn't deduce shader stage from file name: %s", shaderFilename.c_str());
             return nullptr;
         }
-        
+
 
         //Find which shader to load
         std::filesystem::path fullPath = std::filesystem::path(SDL_GetBasePath()) / "shaders";
@@ -259,23 +204,20 @@ namespace HUNT {
         }
 
         //ACTUALLY CREATE THE SHADER
-     SDL_GPUShaderCreateInfo shaderInfo = SDL_GPUShaderCreateInfo{
-    .code_size = fileSize,
-    .code = static_cast<Uint8*>(code),
-    .entrypoint = entrypoint,
-    .format = format,
-    .stage = stage,
-    .num_samplers = (stage == SDL_GPU_SHADERSTAGE_FRAGMENT) ? 1u : 0u, //1  sampler
-    .num_storage_textures = 0,
-    .num_storage_buffers = 0,
-    .num_uniform_buffers = (stage == SDL_GPU_SHADERSTAGE_VERTEX) ? 1u : 0u, //1 cBuffer
+        SDL_GPUShaderCreateInfo shaderInfo = SDL_GPUShaderCreateInfo{
+             .code_size = fileSize,
+             .code = static_cast<Uint8*>(code),
+             .entrypoint = entrypoint,
+             .format = format,
+             .stage = stage,
+             .num_samplers = (stage == SDL_GPU_SHADERSTAGE_FRAGMENT) ? 1u : 0u, //1  sampler
+             .num_storage_textures = 0,
+
+             .num_storage_buffers = 0,
+             .num_uniform_buffers = (stage == SDL_GPU_SHADERSTAGE_VERTEX) ? 1u : 0u, //1 cBuffer
         };
-     SDL_Log("Loading shader: %s", shaderFilename.c_str());
-     SDL_Log("  stage = %s",
-         stage == SDL_GPU_SHADERSTAGE_VERTEX ? "VERTEX" : "FRAGMENT");
-     SDL_Log("  format = %d", format);
-     SDL_Log("  entrypoint = %s", entrypoint);
-     SDL_Log("  path = %s", fullPath.string().c_str());
+
+
         SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
         if (shader == nullptr)
         {
@@ -303,8 +245,8 @@ namespace HUNT {
             impl_->Shutdown();
         }
         //lOAD ALL OTHER SHADERS BELOW
-         
-    
+
+
         //REMEMBER::ALL INPUT TO SHADER INFO IS BELOW!
 
 
@@ -390,12 +332,67 @@ namespace HUNT {
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), vertexShader);
         SDL_ReleaseGPUShader(impl_->gpuDevice.get(), fragmentShader);
     }
-   
-    
-    //Helper function to avoid being in header and repeating code for index and verrtex buffer
-    SDL_GPUBuffer* CreateBuffer(SDL_GPUDevice* gpuDevice,const void* bufferDataIn, Uint32 size, SDL_GPUBufferUsageFlags usage) {
 
-          Uint32 dataInSize = static_cast<Uint32>(size);
+    void Renderer::CreateSampler()
+    {
+        // ALSO ADD FLAGS OR SUMMUIN
+        SDL_GPUSamplerCreateInfo samplerInfo{};
+        samplerInfo.min_filter = SDL_GPU_FILTER_LINEAR;
+        samplerInfo.mag_filter = SDL_GPU_FILTER_LINEAR;
+        samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
+        samplerInfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
+        samplerInfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
+        samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
+
+        impl_->textureSampler = SDL_CreateGPUSampler(impl_->gpuDevice.get(), &samplerInfo);
+
+        if (!impl_->textureSampler)
+        {
+            SDL_Log("Failed to create texture sampler: %s", SDL_GetError());
+            return;
+        }
+    }
+    //-----------------CAMERA--------------------------
+    void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
+    {
+        impl_->cameraMatrix = matrices;
+    }
+
+    void Renderer::SetVSync(bool enabled)
+    {
+        SDL_SetRenderVSync(impl_->renderer3D.get(), enabled);
+    }
+
+
+    //--------------MESH---------------------
+
+
+    MeshGPUBuffers& Renderer::GetMeshBuffers(HUNT::Mesh& meshIn)
+    {
+        auto meshData = meshIn.getMeshData();
+
+        //Attempt to get the mesh
+        auto finalMesh = impl_->allStoredMeshBuffers.find(meshIn.getID());
+        //If it exsits retun its buffers
+        if (finalMesh != impl_->allStoredMeshBuffers.end()) {
+            return finalMesh->second;
+        }
+
+        //if doesnt exsit make new buffers
+        HUNT::MeshGPUBuffers newGPUBuffers;
+        newGPUBuffers.vertexBuffer = CreateVertexBuffer(meshData.vertices);
+        newGPUBuffers.indexBuffer = CreateIndexBuffer(meshData.indices);
+        //and store them at the same ID returning the newly made buffers 
+        auto [a, b] = impl_->allStoredMeshBuffers.emplace(meshIn.getID(), std::move(newGPUBuffers));
+        //idk if its faster to return it FROM the structure or just what I made ill do this for now
+        return a->second;
+
+    }
+
+    //Helper function to avoid being in header and repeating code for index and verrtex buffer
+    SDL_GPUBuffer* CreateBuffer(SDL_GPUDevice* gpuDevice, const void* bufferDataIn, Uint32 size, SDL_GPUBufferUsageFlags usage) {
+
+        Uint32 dataInSize = static_cast<Uint32>(size);
         //Make vertex buffer based on size
         SDL_GPUBufferCreateInfo bufferCreateInfo = SDL_GPUBufferCreateInfo{
             .usage = usage,
@@ -421,16 +418,16 @@ namespace HUNT {
         {
             SDL_Log("Couldn't create transfer buffer: %s", SDL_GetError());
             return nullptr; //temporary
-            
+
         }
 
-       // Vertex* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false));
+        // Vertex* transferData = static_cast<Vertex*>(SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false));
         void* mappedTransferBuffer = SDL_MapGPUTransferBuffer(gpuDevice, transferBuffer, false);
         if (mappedTransferBuffer == nullptr)
         {
             SDL_Log("Couldn't map transfer buffer: %s", SDL_GetError());
             SDL_ReleaseGPUTransferBuffer(gpuDevice, transferBuffer);
-           
+
         }
 
 
@@ -445,7 +442,7 @@ namespace HUNT {
         if (uploadCmdBuf == nullptr)
         {
             SDL_Log("Couldn't acquire GPU command buffer: %s", SDL_GetError());
-            
+
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
@@ -467,7 +464,7 @@ namespace HUNT {
         if (!SDL_SubmitGPUCommandBuffer(uploadCmdBuf))
         {
             SDL_Log("Couldn't submit GPU command buffer: %s", SDL_GetError());
-            
+
         }
 
         SDL_ReleaseGPUTransferBuffer(gpuDevice, transferBuffer);
@@ -481,7 +478,7 @@ namespace HUNT {
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
 
-        return CreateBuffer(impl_->gpuDevice.get(),verticies.data(), verticies.size_bytes(), SDL_GPU_BUFFERUSAGE_VERTEX);
+        return CreateBuffer(impl_->gpuDevice.get(), verticies.data(), verticies.size_bytes(), SDL_GPU_BUFFERUSAGE_VERTEX);
     }
 
     SDL_GPUBuffer* Renderer::CreateIndexBuffer(std::span<std::uint32_t> indices) //ASSIGN INDEX BUFFER
@@ -489,14 +486,24 @@ namespace HUNT {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
         return CreateBuffer(impl_->gpuDevice.get(), indices.data(), indices.size_bytes(), SDL_GPU_BUFFERUSAGE_INDEX);
     }
-    HUNT::Texture* Renderer::LoadTexture(const char* filePath)
+
+    void Renderer::clearMeshBuffers()
+    {
+    }
+
+    //Helper function to load shaders
+   
+
+   //-------------------------TEXTURES---------------------------------
+
+    void Renderer::LoadTexture(const char* filePath)
     {
 
 
         auto textureMapCheck = impl_->loadedTextureMap.find(filePath);
 
         if (textureMapCheck != impl_->loadedTextureMap.end()) {
-            return textureMapCheck->second.get();
+            return;
         }
 
         SDL_GPUCommandBuffer* textureCommandBuffer =SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get());
@@ -504,14 +511,14 @@ namespace HUNT {
         if (!textureCommandBuffer)
         {
             SDL_Log("Failed to find texture command buffer: %s",SDL_GetError());
-            return nullptr;
+            return;
         }
         SDL_GPUCopyPass* textureCopyPass = SDL_BeginGPUCopyPass(textureCommandBuffer);
         //Make sue above was successful
         if (!textureCopyPass)
         {
             SDL_CancelGPUCommandBuffer(textureCommandBuffer);
-            return nullptr;
+            return;;
         }
         //SDLGPU uses references to alter these as the size of the texutre? sure bro
         int width = 0;
@@ -528,7 +535,7 @@ namespace HUNT {
             SDL_CancelGPUCommandBuffer(textureCommandBuffer);
 
             SDL_Log("Failed to load '%s': %s",filePath, SDL_GetError());
-            return nullptr;
+            return;
         }
         auto newTexture = std::make_unique<HUNT::Texture>();
         newTexture->gpuTexture = texture;
@@ -536,10 +543,17 @@ namespace HUNT {
         newTexture->height = height;
         
         impl_->loadedTextureMap.emplace(filePath,std::move(newTexture));
-       
-        //load it into a map?
+    }
 
-        return impl_->loadedTextureMap.at(filePath).get();
+    HUNT::Texture* Renderer::GetLoadedTexture(const char* filePath)
+    {
+        auto textureMapCheck = impl_->loadedTextureMap.find(filePath);
+
+        if (textureMapCheck != impl_->loadedTextureMap.end()) {
+            return textureMapCheck->second.get();
+        }
+     
+        return nullptr;
     }
 
     //BELOW HERE IS THE RENDERING CALLS---------------------------------------------------
@@ -547,31 +561,33 @@ namespace HUNT {
     void Renderer::BeginFrame()
     {
         //Make command buffer and swapchain texture
-        impl_->commandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
+        impl_->renderCommandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
         
+        SDL_GPUTexture* swapchainTexture = nullptr;
 
-        if (!impl_->commandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->commandBuffer, impl_->window, &impl_->swapchainTexture, nullptr, nullptr))
+        if (!impl_->renderCommandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->renderCommandBuffer, impl_->window, &swapchainTexture, nullptr, nullptr))
         {
             // Explode
         }
 
-        SDL_GPUColorTargetInfo colorTargetInfo = {};
-        colorTargetInfo.texture = impl_->swapchainTexture;
-        colorTargetInfo.clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w};
-        colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
-        colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
+        SDL_GPUColorTargetInfo colorTargetInfo = {
+          .texture = swapchainTexture,
+          .clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w},
+          .load_op = SDL_GPU_LOADOP_CLEAR,
+          .store_op = SDL_GPU_STOREOP_STORE,
+
+        };
 
 
-        impl_->renderPass = (SDL_BeginGPURenderPass(impl_->commandBuffer, &colorTargetInfo, 1, nullptr)); //Begin Render Pass.
+
+        impl_->renderPass = (SDL_BeginGPURenderPass(impl_->renderCommandBuffer, &colorTargetInfo, 1, nullptr)); //Begin Render Pass.
     
     }
 
     void Renderer::Render(HUNT::Mesh& meshIn)
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
-        if (impl_->renderPass == nullptr ||
-            impl_->commandBuffer == nullptr ||
-            impl_->gpuPipeline == nullptr)
+        if (impl_->renderPass == nullptr or impl_->renderCommandBuffer == nullptr or impl_->gpuPipeline == nullptr)
         {
             return;
         }
@@ -617,7 +633,7 @@ namespace HUNT {
         };
         SDL_BindGPUIndexBuffer(impl_->renderPass, indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
 
-        SDL_PushGPUVertexUniformData(impl_->commandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
+        SDL_PushGPUVertexUniformData(impl_->renderCommandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
 
         SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
 
@@ -634,10 +650,9 @@ namespace HUNT {
         SDL_EndGPURenderPass(impl_->renderPass); //End Render Pass.
         impl_->renderPass = nullptr;
 
-        SDL_SubmitGPUCommandBuffer(impl_->commandBuffer); //Submit to GPU.
-        impl_->commandBuffer = nullptr;
+        SDL_SubmitGPUCommandBuffer(impl_->renderCommandBuffer); //Submit to GPU.
+        impl_->renderCommandBuffer = nullptr;
 
-        impl_->swapchainTexture = nullptr;
     }
 
 
