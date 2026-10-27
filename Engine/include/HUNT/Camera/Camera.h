@@ -18,6 +18,15 @@ namespace HUNT {
 
 		HUNT::float3 getPosition();		//Get camera's current position
 		HUNT::float3 getRotation();		// Get camera's current rotation
+		void rotate(float pitchDelta, float yawDelta);
+		HUNT::float3 getForward();
+		HUNT::float3 getRight();
+
+		//Movement
+		void moveForward(float amount);
+		void moveBackward(float amount);
+		void moveLeft(float amount);
+		void moveRight(float amount);
 
 		HUNT::mat4 getViewMatrix();
 		HUNT::mat4 getProjectionMatrix();
@@ -25,9 +34,13 @@ namespace HUNT {
 	private:
 		HUNT::float3 position;		//float3 for position
 		HUNT::float3 rotation;		// float3 for rotation (angles)
+		HUNT::float3 forward = HUNT::float3(0.f, 0.f, 1.f);
+		HUNT::float3 right = HUNT::float3(1.f, 0.f, 0.f);
+		HUNT::float3 up = HUNT::float3(0.f, 1.f, 0.f);
 		HUNT::mat4 viewMatrix;	// matrix for current view
 		HUNT::mat4 orthoMatrix;	// current orthographic matrix
-		float speed, frameTime;	// movement speed and time variables
+		float speed;	// movement speed and time variables
 		float lookSpeed;		// rotation speed
+
 	};
 }

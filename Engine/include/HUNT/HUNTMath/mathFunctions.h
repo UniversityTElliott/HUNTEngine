@@ -18,4 +18,12 @@ namespace HUNT
     {
         return glm::radians(degreesIn);
     }
+    inline HUNT::float3 cross(const HUNT::float3 vecA, const HUNT::float3 vecB) //literally just GLMs but for hunt
+    {
+        return glm::cross(vecA,vecB);
+    }
+    inline HUNT::float3 normalise(const HUNT::float3 vecA) //literally just GLMs but for hunt FINALLY I CAN USE THE BRITISH SPELLING!
+    {
+        return glm::normalize(vecA);
+    }
 }

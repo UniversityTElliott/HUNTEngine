@@ -59,7 +59,7 @@ namespace HUNTgame {
        //Set it all for the example
         triangle1.setMeshData(data1);
         triangle1.setID(1);
-       triangle1.SetMaterial(bunnyMat);
+        triangle1.SetMaterial(bunnyMat);
 
 
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
@@ -82,32 +82,34 @@ namespace HUNTgame {
         previousTime_ = currentTime_;
         currentTime_ += seconds;
         float speed = 0.2f;
+        float rotSpeed = 1.5f;
         
         auto& input = engine.GetInput();
 
         input.update();
 
         //Position
-        HUNT::float3 position = myCamera.getPosition();
+      
         if (input.isHeld(HUNT::key::w)) {
-            position.z += speed;
+            myCamera.moveForward(speed);
         }
         if (input.isHeld(HUNT::key::s)) {
-            position.z -= speed;
+            myCamera.moveBackward(speed);
         }
         if (input.isHeld(HUNT::key::a)) {
-            position.x -= speed;
+            myCamera.moveLeft(speed);
         }
         if (input.isHeld(HUNT::key::d)) {
-            position.x += speed;
+            myCamera.moveRight(speed);
         }
-        if (input.isHeld(HUNT::key::space)) {
-            position.y += speed;
+        if (input.isHeld(HUNT::key::q)) {
+            myCamera.rotate(-rotSpeed,0.f);
         }
-        if (input.isHeld(HUNT::key::left_shift)) {
-            position.y -= speed;
+        if (input.isHeld(HUNT::key::e)) {
+            myCamera.rotate(rotSpeed, 0.f);
         }
-        myCamera.setPosition(position);
+
+      
 
         //Rotate
 

@@ -1,3 +1,4 @@
+
 #include <HUNT/Camera/Camera.h>
 #include <HUNT/HUNTMath/mathFunctions.h>
 namespace HUNT
@@ -27,18 +28,25 @@ namespace HUNT
 		float yaw = glm::radians(rotation.y);
 
 		// Calculate the forward direction for a left-handed camera.
-		HUNT::float3 forward(
-			cosf(pitch) * sinf(yaw),
-			sinf(pitch),
-			cosf(pitch) * cosf(yaw)
-		);
+		forward = HUNT::float3(cosf(pitch) * sinf(yaw),sinf(pitch),cosf(pitch) * cosf(yaw));
 		//maybe let users change this but for now up is Y+
+		up = HUNT::float3(0.f, 1.f, 0.f);
+		right = HUNT::normalise(HUNT::cross(up,forward));
 
-		HUNT::float3 eye = HUNT::float3(position.x, position.y, position.z);
 		HUNT::float3 centre = HUNT::float3(position.x + forward.x, position.y + forward.y, position.z + forward.z);
-		HUNT::float3 up(0.f, 1.f, 0.f);
+		
+		viewMatrix = HUNT::lookAtLH(position, centre, up);
+	}
 
-		viewMatrix = HUNT::lookAtLH(eye, centre, up);
+	void Camera::rotate(float yawDelta, float pitchDelta) //X then Y
+	{
+		rotation.x += pitchDelta;
+		rotation.y += yawDelta;
+
+		// Prevent flipping when looking straight up or down.
+		rotation.x = glm::clamp(rotation.x, -89.0f, 89.0f);
+
+		update();
 	}
 
 	void Camera::setPosition(float xIn, float yIn, float zIn)
@@ -58,6 +66,31 @@ namespace HUNT
 		update();
 	}
 
+	void Camera::moveForward(float amount)
+	{
+		
+		position.x += forward.x * amount;
+		position.z += forward.z * amount;
+		update();
+	}
+
+	void Camera::moveBackward(float amount)
+	{
+		moveForward(-amount);
+	}
+
+	void Camera::moveLeft(float amount)
+	{
+		moveRight(-amount);
+	}
+
+	void Camera::moveRight(float amount)
+	{
+		position.x += right.x * amount;
+		position.z += right.z * amount;
+		update();
+	}
+
 	HUNT::float3 Camera::getPosition()
 	{
 		return position;
@@ -66,6 +99,16 @@ namespace HUNT
 	HUNT::float3 Camera::getRotation()
 	{
 		return rotation;
+	}
+
+	HUNT::float3 Camera::getForward()
+	{
+		return forward;
+	}
+
+	HUNT::float3 Camera::getRight()
+	{
+		return right;
 	}
 
 	HUNT::mat4 Camera::getViewMatrix()
