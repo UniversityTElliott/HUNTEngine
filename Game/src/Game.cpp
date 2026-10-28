@@ -67,7 +67,8 @@ namespace HUNTgame {
        meshComp->setMesh(triangle1);
 
        //THIS IS ALL A TEST
-       
+       auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
+       modelComp->loadModel("TestAssets/vegeta.obj");
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);
@@ -109,7 +110,12 @@ namespace HUNTgame {
             myCamera.rotate(rotSpeed, 0.f);
         }
 
-      
+        if (input.isHeld(HUNT::key::space)) {
+            myCamera.moveUp(speed);
+        }
+        if (input.isHeld(HUNT::key::left_ctrl)) {
+            myCamera.moveUp(-speed);
+        }
 
         //Rotate
 
@@ -130,6 +136,9 @@ namespace HUNTgame {
         renderer.BeginFrame();
         
         triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
+        modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
+
+
 
 
         renderer.EndFrame();

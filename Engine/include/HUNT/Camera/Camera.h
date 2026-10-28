@@ -27,6 +27,7 @@ namespace HUNT {
 		void moveBackward(float amount);
 		void moveLeft(float amount);
 		void moveRight(float amount);
+		void moveUp(float amount);
 
 		HUNT::mat4 getViewMatrix();
 		HUNT::mat4 getProjectionMatrix();

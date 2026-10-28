@@ -90,7 +90,11 @@ namespace HUNT
 		position.z += right.z * amount;
 		update();
 	}
-
+	void Camera::moveUp(float amount)
+	{
+		position.y += amount;
+		update();
+	}
 	HUNT::float3 Camera::getPosition()
 	{
 		return position;

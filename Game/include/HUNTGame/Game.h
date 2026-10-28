@@ -5,6 +5,7 @@
 #include <HUNT/HUNTObjects/HUNTObject.h>
 #include <HUNT/Camera/Camera.h>
 #include <HUNT/HUNTObjects/HUNTComponents/HUNTMeshComponent.h>
+#include <HUNT/HUNTObjects/HUNTComponents/HUNTModelComponent.h>
 
 #include <cstdint>
 
@@ -27,6 +28,7 @@ namespace HUNTgame {
         HUNT::Mesh triangle2;
 
         HUNT::HUNTObject triangle3;
+        HUNT::HUNTObject modelTest;
 
         HUNT::Camera myCamera;
 

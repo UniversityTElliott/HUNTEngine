@@ -16,7 +16,7 @@ namespace HUNT {
 	struct Vertex
 	{
 		HUNT::float3 position;
-		HUNT::float4 colour;
+		HUNT::float4 colour = HUNT::float4{ 1.0f, 1.0f, 1.0f, 1.0f };
 		HUNT::float2 UV;
 		//HUNT::float3 normal;
 

@@ -602,8 +602,8 @@ namespace HUNT {
 
 
         HUNT::Texture* texture = meshIn.GetMaterial().GetTexture();
-
-        if (texture->GetGPUTexture() && impl_->textureSampler)
+        
+        if (texture!=nullptr && impl_->textureSampler)
         {
             SDL_GPUTextureSamplerBinding textureBinding{};
 
