@@ -441,11 +441,9 @@ _deps
 CMakeUserPresets.json
 
 #Tom here
-!/HUNTEngine/
-!/HUNTEngine/Game/
-!/HUNTEngine/Game/TestAssets/
-!/HUNTEngine/Game/TestAssets/*.obj
-!/HUNTEngine/Game/TestAssets/**/*.obj
+# Allow .obj files in TestAssets
+!Game/TestAssets/*.obj
+!Game/TestAssets/**/*.obj
 
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
