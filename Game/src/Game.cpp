@@ -54,21 +54,21 @@ namespace HUNTgame {
          
 
        HUNT::Material bunnyMat;
-       bunnyMat.SetTexture(renderer.GetLoadedTexture("TestAssets/bunny.png"));
+      // bunnyMat.SetTexture(renderer.GetLoadedTexture("TestAssets/bunny.png"));
 
        //Set it all for the example
-        triangle1.setMeshData(data1);
-        triangle1.setID(1);
-        triangle1.SetMaterial(bunnyMat);
+       // triangle1.setMeshData(data1);
+//triangle1.setID(0);
+      //  triangle1.SetMaterial(bunnyMat);
 
 
-       auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
+       //auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
 
-       meshComp->setMesh(triangle1);
+      // meshComp->setMesh(triangle1);
 
        //THIS IS ALL A TEST
        auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
-       modelComp->loadModel("TestAssets/vegeta.obj");
+       modelComp->loadModel("TestAssets/vegeta.obj", renderer); //CHANGE THIS
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);
@@ -135,7 +135,7 @@ namespace HUNTgame {
 
         renderer.BeginFrame();
         
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
+     //   triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
         modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
 
 
