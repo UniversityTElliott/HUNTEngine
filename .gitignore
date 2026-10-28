@@ -439,7 +439,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
-!Game/TestAssets/*.obj #For models ty oliver
+!HUNTEngine/Game/TestAssets/*.obj #For models ty oliver
 
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

@@ -17,7 +17,7 @@ Output main(Input input)
     Output output;
     
     float4 texColor = HUNTTexture.Sample(HUNTSampler, input.UV);
-    
+
     output.Colour = texColor * input.Colour;
 
     return output;

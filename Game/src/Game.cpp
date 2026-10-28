@@ -18,7 +18,7 @@ namespace HUNTgame {
 
         renderer.InitGPU();
 
-        renderer.LoadTexture("TestAssets/bunny.png");
+        //renderer.LoadTexture("TestAssets/bunny.png");
 
 
 
@@ -68,7 +68,7 @@ namespace HUNTgame {
 
        //THIS IS ALL A TEST
        auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
-       modelComp->loadModel("TestAssets/vegeta.obj", renderer); //CHANGE THIS
+       modelComp->loadModel("TestAssets/Goron.obj", renderer); //CHANGE THIS
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);

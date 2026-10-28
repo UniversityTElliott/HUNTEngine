@@ -212,7 +212,6 @@ namespace HUNT {
              .stage = stage,
              .num_samplers = (stage == SDL_GPU_SHADERSTAGE_FRAGMENT) ? 1u : 0u, //1  sampler
              .num_storage_textures = 0,
-
              .num_storage_buffers = 0,
              .num_uniform_buffers = (stage == SDL_GPU_SHADERSTAGE_VERTEX) ? 1u : 0u, //1 cBuffer
         };
@@ -342,6 +341,7 @@ namespace HUNT {
         samplerInfo.mipmap_mode = SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
         samplerInfo.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
         samplerInfo.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
+        samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
         samplerInfo.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_REPEAT;
 
         impl_->textureSampler = SDL_CreateGPUSampler(impl_->gpuDevice.get(), &samplerInfo);
