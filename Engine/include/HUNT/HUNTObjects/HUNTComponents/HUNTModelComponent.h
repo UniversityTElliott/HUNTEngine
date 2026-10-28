@@ -109,6 +109,7 @@ namespace HUNT {
                 //TODO:: Proper asset manager that means this doesnt need renderer can just use "LoadTexture"
                 //THAT SHOULD ALSO AUTO ASSIGN IDS CUZ ITS DUMB MANUALLY SETTING THEM
                 //ADD DEFAULT MATERAL AND TEXTURE ALSO !!!!
+                //Renderer doesnt load in the right order add Z buffer things
             }
         }
 
