@@ -48,11 +48,14 @@ namespace HUNT {
             sdlInitialised = false;
         }
 
-        void PollEvents() {
+        void PollEvents(Renderer* rendererIn) {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 if (event.type == SDL_EVENT_QUIT || event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
                     quit = true;
+                }
+                if(event.type == SDL_EVENT_WINDOW_RESIZED){
+                    rendererIn->resetDepthBuffer();
                 }
             }
         }
@@ -110,7 +113,7 @@ namespace HUNT {
                 result = 1;
             }
             while (result == 0 && !impl_->quit) {
-                impl_->PollEvents();
+                impl_->PollEvents(impl_->renderer.get());
                 if (impl_->quit) break;
 
                 const auto now = Clock::now();

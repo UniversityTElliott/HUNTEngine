@@ -122,7 +122,12 @@ namespace HUNT {
     Renderer::~Renderer() = default;
 
 
+    void Renderer::resetDepthBuffer() {
 
+        SDL_GetWindowSize(impl_->window, &impl_->width, &impl_->height);
+
+        CreateDepthSampler();
+   }
 
     //---------------------INITIALISE------------------------------------------------
     void Renderer::InitGPU()

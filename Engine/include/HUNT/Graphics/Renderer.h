@@ -25,7 +25,7 @@ namespace HUNT {
         Renderer(const Renderer&) = delete;
         Renderer& operator=(const Renderer&) = delete;
         //
-        void setWindowSize(float width,float height);
+        void resetDepthBuffer();
         //Initialisers
         void InitGPU();
         void CreatePipeline();

@@ -82,7 +82,7 @@ namespace HUNTgame {
     void DemoGame::FixedUpdate(HUNT::Engine& engine, float seconds) {
         previousTime_ = currentTime_;
         currentTime_ += seconds;
-        float speed = 0.2f;
+        float speed = 0.8f;
         float rotSpeed = 1.5f;
         
         auto& input = engine.GetInput();
