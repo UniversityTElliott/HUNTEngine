@@ -24,11 +24,14 @@ namespace HUNT {
 
         Renderer(const Renderer&) = delete;
         Renderer& operator=(const Renderer&) = delete;
+        //
+        void setWindowSize(float width,float height);
         //Initialisers
         void InitGPU();
         void CreatePipeline();
         void CreateSampler();
-
+        void CreateDepthSampler();
+        
         //Camera Stuff
         void SetCameraMatrix(const MatrixBufferType& matrices);
         void SetVSync(bool enabled);
@@ -45,7 +48,7 @@ namespace HUNT {
         void BeginFrame();
         void Render(HUNT::Mesh& meshIn);
         void EndFrame();
-
+        
     private:
         struct Impl;
         std::unique_ptr<Impl> impl_;

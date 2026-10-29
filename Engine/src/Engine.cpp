@@ -34,6 +34,8 @@ namespace HUNT {
         bool quit = false;
         bool vsyncEnabled = false;
 
+        int windowHeight = 0;
+        int windowWidth = 0;
         ~Impl() { Shutdown(); }
 
         void Shutdown() noexcept {
@@ -61,6 +63,9 @@ namespace HUNT {
 
     //This is mostly SDL boilerplate. Don't worry about it too much.
     bool Engine::Initialise(const char* title, int width, int height) {
+
+        impl_->windowWidth = width;
+        impl_->windowHeight = height;
         if (impl_->sdlInitialised || !title || width <= 0 || height <= 0) 
             return false;
         if (!SDL_Init(SDL_INIT_VIDEO)) {

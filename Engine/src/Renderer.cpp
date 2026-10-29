@@ -1,3 +1,4 @@
+
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
@@ -36,9 +37,12 @@ namespace HUNT {
           };*/
 
        HUNT::float4 defaultColour{0.f,0.f,0.f,1.f};
+       int width = 0;
+       int height = 0;
 
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
+        SDL_GPUTexture* depthTexture = nullptr;
         //SDL manages these so raw is OK???
         SDL_GPURenderPass* renderPass = nullptr;
         SDL_GPUCommandBuffer* renderCommandBuffer = nullptr;
@@ -118,6 +122,8 @@ namespace HUNT {
     Renderer::~Renderer() = default;
 
 
+
+
     //---------------------INITIALISE------------------------------------------------
     void Renderer::InitGPU()
     {
@@ -138,8 +144,11 @@ namespace HUNT {
             impl_->gpuDevice.reset();
         }
 
-        CreatePipeline();
+        SDL_GetWindowSize(impl_->window, &impl_->width, &impl_->height);
+
+        CreateDepthSampler();
         CreateSampler();
+        CreatePipeline();
         
     }
     //Helper function for the pipeline creation, makes
@@ -297,6 +306,11 @@ namespace HUNT {
     }
         };
 
+        //Depth buffer stuffs
+
+
+
+
         //Build the grapphics pipeline with the afformentioned set parts
         SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = SDL_GPUGraphicsPipelineCreateInfo{
         .vertex_shader = vertexShader,
@@ -313,9 +327,16 @@ namespace HUNT {
             .cull_mode = SDL_GPU_CULLMODE_BACK,
             .front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE,
         },
+        .depth_stencil_state = {
+        .compare_op = SDL_GPU_COMPAREOP_LESS_OR_EQUAL,
+        .enable_depth_test = true,
+        .enable_depth_write = true,
+        },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = colorTargetDescriptions.data(),
             .num_color_targets = colorTargetDescriptions.size(),
+            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+            .has_depth_stencil_target = true
         },
         };
 
@@ -351,6 +372,22 @@ namespace HUNT {
             SDL_Log("Failed to create texture sampler: %s", SDL_GetError());
             return;
         }
+    }
+    void Renderer::CreateDepthSampler()
+    {
+        SDL_GPUTextureCreateInfo depthInfo = {
+    .type = SDL_GPU_TEXTURETYPE_2D,
+    .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+    .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
+    .width = static_cast<Uint32>(impl_->width),
+    .height = static_cast<Uint32>(impl_->height),
+    .layer_count_or_depth = 1,
+    .num_levels = 1,
+    .sample_count = SDL_GPU_SAMPLECOUNT_1
+    
+        };
+
+        impl_->depthTexture = (SDL_CreateGPUTexture(impl_->gpuDevice.get(), &depthInfo));
     }
     //-----------------CAMERA--------------------------
     void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
@@ -577,10 +614,15 @@ namespace HUNT {
           .store_op = SDL_GPU_STOREOP_STORE,
 
         };
+        SDL_GPUDepthStencilTargetInfo depthTargetInfo = {
+          .texture = impl_->depthTexture,
+          .clear_depth = 1.0f,
+         .load_op = SDL_GPU_LOADOP_CLEAR,
+          .store_op = SDL_GPU_STOREOP_DONT_CARE
+        };
 
 
-
-        impl_->renderPass = (SDL_BeginGPURenderPass(impl_->renderCommandBuffer, &colorTargetInfo, 1, nullptr)); //Begin Render Pass.
+        impl_->renderPass = (SDL_BeginGPURenderPass(impl_->renderCommandBuffer, &colorTargetInfo, 1, &depthTargetInfo)); //Begin Render Pass.
     
     }
 
