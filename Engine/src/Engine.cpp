@@ -164,5 +164,16 @@ namespace HUNT {
     {
         return *impl_->inputHandler;
     }
+
+    void Engine::lockMouse(bool in)
+    {
+        SDL_SetWindowRelativeMouseMode(impl_->window.get(), in);
+    }
+
+    void Engine::resetMousePosition()
+    {
+        SDL_GetWindowSize(impl_->window.get(), &impl_->windowWidth, &impl_->windowHeight);
+        SDL_WarpMouseInWindow(impl_->window.get(), impl_->windowWidth / 2.0f, impl_->windowHeight / 2.0f);
+    }
    
 }

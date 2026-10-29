@@ -16,9 +16,15 @@ namespace HUNT
         InputHandler& operator=(const InputHandler&) = delete;
 
         void update();
-        bool isHeld(HUNT::Key key) const;
-        bool wasPressed(HUNT::Key key) const;
-        bool wasReleased(HUNT::Key key) const;
+        bool isHeld(HUNT::Input inputIn) const;
+        bool wasPressed(HUNT::Input inputIn) const;
+        bool wasReleased(HUNT::Input inputIn) const;
+
+        float getMouseX();
+        float getMouseY();
+
+        float getMouseXDifference();
+        float getMouseYDifference();
 
     private:
         struct Impl;

@@ -117,6 +117,23 @@ namespace HUNTgame {
             myCamera.moveUp(-speed);
         }
 
+
+
+
+        if (input.isHeld(HUNT::mouse::rightMouse))
+        {
+            constexpr float sensitivity = 0.15f;
+            engine.lockMouse(true);
+            engine.resetMousePosition();
+            myCamera.rotate(input.getMouseXDifference() * sensitivity, -input.getMouseYDifference() * sensitivity);
+            
+        }
+        else {
+            engine.lockMouse(false);
+        }
+
+
+
         //Rotate
 
     }

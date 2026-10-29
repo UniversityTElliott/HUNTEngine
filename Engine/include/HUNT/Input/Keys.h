@@ -1,73 +1,128 @@
 #pragma once
 #include <SDL3/SDL_scancode.h>
+#include <SDL3/SDL_mouse.h>
 //UNSURE IF I SHOULD KEEP THIS! DOES IT MATTER ASK GAZ
 //Feels shit but might be apprecired idk
 namespace HUNT
 {
+
+    enum class InputType {
+        Keyboard,
+        Mouse,
+        Controller
+    };
+
+    struct Input {
+        InputType type;
+        int idCode;
+    };
+
     using Key = SDL_Scancode;
 
     namespace key {
         // Letters
-        constexpr SDL_Scancode a = SDL_SCANCODE_A;
-        constexpr SDL_Scancode b = SDL_SCANCODE_B;
-        constexpr SDL_Scancode c = SDL_SCANCODE_C;
-        constexpr SDL_Scancode d = SDL_SCANCODE_D;
-        constexpr SDL_Scancode e = SDL_SCANCODE_E;
-        constexpr SDL_Scancode f = SDL_SCANCODE_F;
-        constexpr SDL_Scancode g = SDL_SCANCODE_G;
-        constexpr SDL_Scancode h = SDL_SCANCODE_H;
-        constexpr SDL_Scancode i = SDL_SCANCODE_I;
-        constexpr SDL_Scancode j = SDL_SCANCODE_J;
-        constexpr SDL_Scancode k = SDL_SCANCODE_K;
-        constexpr SDL_Scancode l = SDL_SCANCODE_L;
-        constexpr SDL_Scancode m = SDL_SCANCODE_M;
-        constexpr SDL_Scancode n = SDL_SCANCODE_N;
-        constexpr SDL_Scancode o = SDL_SCANCODE_O;
-        constexpr SDL_Scancode p = SDL_SCANCODE_P;
-        constexpr SDL_Scancode q = SDL_SCANCODE_Q;
-        constexpr SDL_Scancode r = SDL_SCANCODE_R;
-        constexpr SDL_Scancode s = SDL_SCANCODE_S;
-        constexpr SDL_Scancode t = SDL_SCANCODE_T;
-        constexpr SDL_Scancode u = SDL_SCANCODE_U;
-        constexpr SDL_Scancode v = SDL_SCANCODE_V;
-        constexpr SDL_Scancode w = SDL_SCANCODE_W;
-        constexpr SDL_Scancode x = SDL_SCANCODE_X;
-        constexpr SDL_Scancode y = SDL_SCANCODE_Y;
-        constexpr SDL_Scancode z = SDL_SCANCODE_Z;
+// Letters
+        constexpr Input a{ InputType::Keyboard, SDL_SCANCODE_A };
+        constexpr Input b{ InputType::Keyboard, SDL_SCANCODE_B };
+        constexpr Input c{ InputType::Keyboard, SDL_SCANCODE_C };
+        constexpr Input d{ InputType::Keyboard, SDL_SCANCODE_D };
+        constexpr Input e{ InputType::Keyboard, SDL_SCANCODE_E };
+        constexpr Input f{ InputType::Keyboard, SDL_SCANCODE_F };
+        constexpr Input g{ InputType::Keyboard, SDL_SCANCODE_G };
+        constexpr Input h{ InputType::Keyboard, SDL_SCANCODE_H };
+        constexpr Input i{ InputType::Keyboard, SDL_SCANCODE_I };
+        constexpr Input j{ InputType::Keyboard, SDL_SCANCODE_J };
+        constexpr Input k{ InputType::Keyboard, SDL_SCANCODE_K };
+        constexpr Input l{ InputType::Keyboard, SDL_SCANCODE_L };
+        constexpr Input m{ InputType::Keyboard, SDL_SCANCODE_M };
+        constexpr Input n{ InputType::Keyboard, SDL_SCANCODE_N };
+        constexpr Input o{ InputType::Keyboard, SDL_SCANCODE_O };
+        constexpr Input p{ InputType::Keyboard, SDL_SCANCODE_P };
+        constexpr Input q{ InputType::Keyboard, SDL_SCANCODE_Q };
+        constexpr Input r{ InputType::Keyboard, SDL_SCANCODE_R };
+        constexpr Input s{ InputType::Keyboard, SDL_SCANCODE_S };
+        constexpr Input t{ InputType::Keyboard, SDL_SCANCODE_T };
+        constexpr Input u{ InputType::Keyboard, SDL_SCANCODE_U };
+        constexpr Input v{ InputType::Keyboard, SDL_SCANCODE_V };
+        constexpr Input w{ InputType::Keyboard, SDL_SCANCODE_W };
+        constexpr Input x{ InputType::Keyboard, SDL_SCANCODE_X };
+        constexpr Input y{ InputType::Keyboard, SDL_SCANCODE_Y };
+        constexpr Input z{ InputType::Keyboard, SDL_SCANCODE_Z };
 
         // Common controls
-        constexpr SDL_Scancode space = SDL_SCANCODE_SPACE;
-        constexpr SDL_Scancode enter = SDL_SCANCODE_RETURN;
-        constexpr SDL_Scancode escape = SDL_SCANCODE_ESCAPE;
-        constexpr SDL_Scancode tab = SDL_SCANCODE_TAB;
-        constexpr SDL_Scancode backspace = SDL_SCANCODE_BACKSPACE;
-        constexpr SDL_Scancode delete_key = SDL_SCANCODE_DELETE;
-        constexpr SDL_Scancode insert = SDL_SCANCODE_INSERT;
+        constexpr Input space{ InputType::Keyboard, SDL_SCANCODE_SPACE };
+        constexpr Input enter{ InputType::Keyboard, SDL_SCANCODE_RETURN };
+        constexpr Input escape{ InputType::Keyboard, SDL_SCANCODE_ESCAPE };
+        constexpr Input tab{ InputType::Keyboard, SDL_SCANCODE_TAB };
+        constexpr Input backspace{ InputType::Keyboard, SDL_SCANCODE_BACKSPACE };
+        constexpr Input delete_key{ InputType::Keyboard, SDL_SCANCODE_DELETE };
+        constexpr Input insert{ InputType::Keyboard, SDL_SCANCODE_INSERT };
 
         // Modifiers
-        constexpr SDL_Scancode left_shift = SDL_SCANCODE_LSHIFT;
-        constexpr SDL_Scancode right_shift = SDL_SCANCODE_RSHIFT;
-        constexpr SDL_Scancode left_ctrl = SDL_SCANCODE_LCTRL;
-        constexpr SDL_Scancode right_ctrl = SDL_SCANCODE_RCTRL;
-        constexpr SDL_Scancode left_alt = SDL_SCANCODE_LALT;
-        constexpr SDL_Scancode right_alt = SDL_SCANCODE_RALT;
-        constexpr SDL_Scancode caps_lock = SDL_SCANCODE_CAPSLOCK;
+        constexpr Input left_shift{ InputType::Keyboard, SDL_SCANCODE_LSHIFT };
+        constexpr Input right_shift{ InputType::Keyboard, SDL_SCANCODE_RSHIFT };
+        constexpr Input left_ctrl{ InputType::Keyboard, SDL_SCANCODE_LCTRL };
+        constexpr Input right_ctrl{ InputType::Keyboard, SDL_SCANCODE_RCTRL };
+        constexpr Input left_alt{ InputType::Keyboard, SDL_SCANCODE_LALT };
+        constexpr Input right_alt{ InputType::Keyboard, SDL_SCANCODE_RALT };
+        constexpr Input caps_lock{ InputType::Keyboard, SDL_SCANCODE_CAPSLOCK };
 
         // Arrow keys
-        constexpr SDL_Scancode up = SDL_SCANCODE_UP;
-        constexpr SDL_Scancode down = SDL_SCANCODE_DOWN;
-        constexpr SDL_Scancode left = SDL_SCANCODE_LEFT;
-        constexpr SDL_Scancode right = SDL_SCANCODE_RIGHT;
+        constexpr Input up{ InputType::Keyboard, SDL_SCANCODE_UP };
+        constexpr Input down{ InputType::Keyboard, SDL_SCANCODE_DOWN };
+        constexpr Input left{ InputType::Keyboard, SDL_SCANCODE_LEFT };
+        constexpr Input right{ InputType::Keyboard, SDL_SCANCODE_RIGHT };
+
 
     }
     
    
 }
-namespace HUNT::mouse
-{
+namespace HUNT::mouse{
     
+ constexpr Input leftMouse{InputType::Mouse, SDL_BUTTON_LMASK};
+ constexpr Input rightMouse{ InputType::Mouse, SDL_BUTTON_RMASK };
+ constexpr Input middleMouse{ InputType::Mouse, SDL_BUTTON_MMASK };
 }
 namespace HUNT::controller
 {
     
 }
+//Taken from CMP301 example proj for template
+/*
+    if (input->isMouseActive())
+    {
+        // mouse look is on
+        deltax = input->getMouseX() - (winWidth / 2);
+        deltay = input->getMouseY() - (winHeight / 2);
+        turn(deltax, deltay);
+        cursor.x = winWidth / 2;
+        cursor.y = winHeight / 2;
+        ClientToScreen(wnd, &cursor);
+        SetCursorPos(cursor.x, cursor.y);
+    }
+
+    if (input->isRightMouseDown() && !input->isMouseActive())
+    {
+        // re-position cursor
+        cursor.x = winWidth / 2;
+        cursor.y = winHeight / 2;
+        ClientToScreen(wnd, &cursor);
+        SetCursorPos(cursor.x, cursor.y);
+        input->setMouseX(winWidth / 2);
+        input->setMouseY(winHeight / 2);
+
+        // set mouse tracking as active and hide mouse cursor
+        input->setMouseActive(true);
+        ShowCursor(false);
+    }
+    else if (!input->isRightMouseDown() && input->isMouseActive())
+    {
+        // disable mouse tracking and show mouse cursor
+        input->setMouseActive(false);
+        ShowCursor(true);
+    }
+
+
+
+*/
