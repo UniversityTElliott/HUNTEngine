@@ -24,7 +24,7 @@ namespace HUNTgame {
 
     private:
        
-        HUNT::Mesh triangle1;
+        
         HUNT::Mesh triangle2;
 
         HUNT::HUNTObject triangle3;

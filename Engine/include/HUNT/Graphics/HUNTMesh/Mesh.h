@@ -39,11 +39,11 @@ namespace HUNT {
                 identifier = idIn;
         }
 
-        void SetMaterial(HUNT::Material material)
+        void setMaterial(HUNT::Material material)
         {
             meshMaterial = material;
         }
-        HUNT::Material GetMaterial() 
+        HUNT::Material getMaterial() 
         {
             return meshMaterial;
         }

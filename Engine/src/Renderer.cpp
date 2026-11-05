@@ -644,7 +644,7 @@ namespace HUNT {
         //impl_->frameVertexBuffers.push_back(vertexBuffer);
 
 
-        HUNT::Texture* texture = meshIn.GetMaterial().GetTexture();
+        HUNT::Texture* texture = meshIn.getMaterial().GetTexture();
         
         if (texture!=nullptr && impl_->textureSampler)
         {

@@ -56,9 +56,8 @@ namespace HUNTgame {
         assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
        HUNT::Material bunnyMat;
        bunnyMat.SetTexture(assetManager.GetTexture("bunny"));
-        triangle1.setMeshData(data1);
-        triangle1.SetMaterial(bunnyMat);
-       assetManager.LoadMeshToAssetManager(triangle1,"Cube");
+        
+       assetManager.LoadMeshToAssetManager(data1,bunnyMat,"Cube");
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
        meshComp->setMesh(assetManager.GetMesh("Cube"));
        

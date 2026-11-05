@@ -18,9 +18,9 @@ namespace HUNT
 
         uint32_t uniqueMeshIDs = 0;
 
-        std::vector<Mesh> meshes;
-        std::vector<Material> materials;
-        std::vector<Model> models; //make the model class
+        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<std::unique_ptr<Material>> materials;
+        std::vector<std::unique_ptr<Model>> models; //make the model class
 
 
 
@@ -127,6 +127,7 @@ namespace HUNT
 
             printf("%zu\n", modelMeshData.vertices.size());
             //FILL INDEX DATA AND FLIP IT
+            //TODO:: REMOVE AS THERE IS A WAY WIOTH ASSIMP TO FLIP
             for (int j = 0; j < mesh->mNumFaces; ++j)
             {
                 const aiFace& face = mesh->mFaces[j];
@@ -154,7 +155,7 @@ namespace HUNT
 
             HUNT::Mesh meshToLoad(modelMeshData);
             meshToLoad.setID(impl_->uniqueMeshIDs++);
-            meshToLoad.SetMaterial(material);
+            meshToLoad.setMaterial(material);
             tempModelMesh.push_back(meshToLoad);
 
         }
@@ -168,13 +169,13 @@ namespace HUNT
 
         uint32_t index = impl_->models.size();
         HUNT::Model modelToStore(tempModelMesh);
-        impl_->models.push_back(std::move(modelToStore));
+        impl_->models.push_back(std::make_unique<HUNT::Model>(std::move(modelToStore)));
         impl_->modelLookup.emplace(std::move(name), index);
 
     }
 
 
-    void AssetManager::LoadMeshToAssetManager(HUNT::Mesh meshIn, std::string name)
+    void AssetManager::LoadMeshToAssetManager(HUNT::MeshData meshDataIn, HUNT::Material materialIn, std::string name)
     {
         auto meshID = impl_->meshLookup.find(name);
 
@@ -183,11 +184,15 @@ namespace HUNT
             return;
         }
 
-        meshIn.setID(impl_->uniqueMeshIDs++);
+        HUNT::Mesh newMesh;
+        newMesh.setID(impl_->uniqueMeshIDs++);
+        newMesh.setMaterial(materialIn);
+        newMesh.setMeshData(meshDataIn);
+        
         //As models have meshes and they can exist by themself they need shared unique IDS but I want to keep the modelMeshes away from this vector therefore this solution
         uint32_t index = impl_->meshes.size();
 
-        impl_->meshes.push_back(std::move(meshIn));
+        impl_->meshes.push_back(std::make_unique<HUNT::Mesh>(std::move(newMesh)));
         impl_->meshLookup.emplace(std::move(name), index);
     }
 
@@ -215,7 +220,7 @@ namespace HUNT
             return nullptr;
         }
         //Search it in the vector (oh so contiguous)
-        return &impl_->models.at(modelID->second);
+        return impl_->models.at(modelID->second).get();
     }
 
     Mesh* AssetManager::GetMesh(const std::string& name)
@@ -228,7 +233,7 @@ namespace HUNT
             return nullptr;
         }
         //Search it in the vector (oh so contiguous)
-        return &impl_->meshes.at(meshID->second);
+        return impl_->meshes.at(meshID->second).get();
     }
 
 
