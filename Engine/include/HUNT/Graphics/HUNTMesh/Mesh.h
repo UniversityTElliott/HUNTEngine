@@ -29,6 +29,16 @@ namespace HUNT {
             meshData = data;
         }
 
+        uint32_t getID() {
+            return identifier;
+        }
+
+
+        void setID(uint32_t idIn)
+        {
+                identifier = idIn;
+        }
+
         void SetMaterial(HUNT::Material material)
         {
             meshMaterial = material;
@@ -42,6 +52,7 @@ namespace HUNT {
     private:
 
        HUNT::MeshData meshData;
+       uint32_t identifier = 0;
        HUNT::Material meshMaterial; //change later idk if I want the mesh to own the material or the renderer
 
     };
