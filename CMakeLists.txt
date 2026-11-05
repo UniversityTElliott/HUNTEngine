@@ -78,11 +78,13 @@ FetchContent_MakeAvailable(glm)
 add_library(Engine STATIC
     Engine/src/Engine.cpp
     Engine/src/Renderer.cpp
-    "Engine/src/InputHandler.cpp"
-    "Engine/include/HUNT/Input/InputHandler.h"
-    "Engine/src/Camera.cpp"
-    "Engine/include/HUNT/Camera/Camera.h"
-    "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h"
+    Engine/src/InputHandler.cpp
+    Engine/include/HUNT/Input/InputHandler.h
+    Engine/include/HUNT/AssetManager.h
+    Engine/src/AssetManager.cpp
+    Engine/src/Camera.cpp
+    Engine/include/HUNT/Camera/Camera.h
+    Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h
 )
 
 add_library(Game STATIC Game/src/Game.cpp "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h")

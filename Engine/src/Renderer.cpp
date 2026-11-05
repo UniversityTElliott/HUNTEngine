@@ -56,8 +56,7 @@ namespace HUNT {
         .projection = glm::perspective(90.f,1080.f/720.f,0.1f,200.f), //BUILD THIS FROM PASSED IN DATA
         };
         std::unordered_map<uint32_t, MeshGPUBuffers> allStoredMeshBuffers;
-        std::unordered_map<std::string, std::unique_ptr<HUNT::Texture>> loadedTextureMap;
-
+        std::vector<std::unique_ptr<HUNT::Texture>> loadedTextureVector;
      
 
 
@@ -81,14 +80,15 @@ namespace HUNT {
             allStoredMeshBuffers.clear();
 
             //loaded Textures
-            for (auto& [texPath, texture] : loadedTextureMap)
+            for (auto& texture : loadedTextureVector)
             {
                 if (texture && texture->GetGPUTexture())
                 {
                     SDL_ReleaseGPUTexture(gpuDevice.get(),texture->GetGPUTexture());
+                    texture->gpuTexture = nullptr;
                 }
             }
-            loadedTextureMap.clear();
+            loadedTextureVector.clear();
 
             allStoredMeshBuffers.clear();
             //Samplers
@@ -538,29 +538,22 @@ namespace HUNT {
 
    //-------------------------TEXTURES---------------------------------
 
-    void Renderer::LoadTexture(const char* filePath)
+    uint32_t Renderer::LoadTexture(const char* filePath)
     {
-
-
-        auto textureMapCheck = impl_->loadedTextureMap.find(filePath);
-
-        if (textureMapCheck != impl_->loadedTextureMap.end()) {
-            return;
-        }
 
         SDL_GPUCommandBuffer* textureCommandBuffer =SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get());
         //Make sure above was successful
         if (!textureCommandBuffer)
         {
             SDL_Log("Failed to find texture command buffer: %s",SDL_GetError());
-            return;
+            return -1;
         }
         SDL_GPUCopyPass* textureCopyPass = SDL_BeginGPUCopyPass(textureCommandBuffer);
         //Make sue above was successful
         if (!textureCopyPass)
         {
             SDL_CancelGPUCommandBuffer(textureCommandBuffer);
-            return;;
+            return -1;;
         }
         //SDLGPU uses references to alter these as the size of the texutre? sure bro
         int width = 0;
@@ -577,25 +570,28 @@ namespace HUNT {
             SDL_CancelGPUCommandBuffer(textureCommandBuffer);
 
             SDL_Log("Failed to load '%s': %s",filePath, SDL_GetError());
-            return;
+            return -1;
         }
         auto newTexture = std::make_unique<HUNT::Texture>();
         newTexture->gpuTexture = texture;
         newTexture->width = width;
         newTexture->height = height;
-        
-        impl_->loadedTextureMap.emplace(filePath,std::move(newTexture));
+        uint32_t textureID = impl_->loadedTextureVector.size();
+
+        impl_->loadedTextureVector.push_back(std::move(newTexture));
+
+        return textureID;
     }
 
-    HUNT::Texture* Renderer::GetLoadedTexture(const char* filePath)
+    HUNT::Texture* Renderer::GetLoadedTexture(uint32_t textureID)
     {
-        auto textureMapCheck = impl_->loadedTextureMap.find(filePath);
-
-        if (textureMapCheck != impl_->loadedTextureMap.end()) {
-            return textureMapCheck->second.get();
+        //IF its not in the vector it fails
+        if (textureID >= impl_->loadedTextureVector.size())
+        {
+            return nullptr;
         }
-     
-        return nullptr;
+        //send it
+        return impl_->loadedTextureVector[textureID].get();
     }
 
     //BELOW HERE IS THE RENDERING CALLS---------------------------------------------------

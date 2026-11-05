@@ -41,8 +41,8 @@ namespace HUNT {
         SDL_GPUBuffer* CreateIndexBuffer(std::span<std::uint32_t> indices);
         void clearMeshBuffers();
         //Texture Stuff
-        void LoadTexture(const char* filePath);
-        HUNT::Texture* GetLoadedTexture(const char* filePath);
+        uint32_t LoadTexture(const char* filePath);
+        HUNT::Texture* GetLoadedTexture(uint32_t textureID);
 
         //Rendering block
         void BeginFrame();

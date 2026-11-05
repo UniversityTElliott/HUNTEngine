@@ -25,24 +25,24 @@ namespace HUNT {
 
         };
          void Render(Renderer& rendererIn) {
-             rendererIn.Render(mesh);
+             rendererIn.Render(*mesh);
          }
 
 
 
          Mesh& getMesh()
          {
-             return mesh;
+             return *mesh;
          }
 
-         void setMesh(const Mesh& data)
+         void setMesh(Mesh* data)
          {
              mesh = data;
          }
 
     private:
 
-        HUNT::Mesh mesh;
+        HUNT::Mesh* mesh;
 
     };
 

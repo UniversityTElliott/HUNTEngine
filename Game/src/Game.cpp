@@ -3,6 +3,7 @@
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
+#include <HUNT/AssetManager.h>
 #include <HUNT/HUNTMath/mathFunctions.h>
 #include <algorithm>
 #include <cmath>
@@ -15,12 +16,11 @@ namespace HUNTgame {
 
     bool DemoGame::Start(HUNT::Engine& engine) {
         auto& renderer = engine.GetRenderer();
+        auto& assetManager = engine.GetAssetManager();
 
         renderer.InitGPU();
-
-        //renderer.LoadTexture("TestAssets/bunny.png");
-
-
+     
+        
 
         HUNT::MeshData data1;
         //CUBE!
@@ -51,24 +51,22 @@ namespace HUNTgame {
     
         //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
-         
-
+       
+        
+        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
        HUNT::Material bunnyMat;
-      // bunnyMat.SetTexture(renderer.GetLoadedTexture("TestAssets/bunny.png"));
-
-       //Set it all for the example
-       // triangle1.setMeshData(data1);
-//triangle1.setID(0);
-      //  triangle1.SetMaterial(bunnyMat);
-
-
-       //auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
-
-      // meshComp->setMesh(triangle1);
-
+       bunnyMat.SetTexture(assetManager.GetTexture("bunny"));
+        triangle1.setMeshData(data1);
+        triangle1.SetMaterial(bunnyMat);
+       assetManager.LoadMeshToAssetManager(triangle1,"Cube");
+       auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
+       meshComp->setMesh(assetManager.GetMesh("Cube"));
+       
        //THIS IS ALL A TEST
+
+        assetManager.LoadModelToAssetManager("TestAssets/Goron.obj","Goron");
        auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
-       modelComp->loadModel("TestAssets/Goron.obj", renderer); //CHANGE THIS
+       modelComp->setModel(assetManager.GetModel("Goron"));
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);
@@ -152,7 +150,7 @@ namespace HUNTgame {
 
         renderer.BeginFrame();
         
-     //   triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
+        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
         modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
 
 

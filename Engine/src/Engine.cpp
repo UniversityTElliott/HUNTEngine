@@ -1,8 +1,7 @@
-﻿
-#include <HUNT/Engine.h>
+﻿#include <HUNT/Engine.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
-
+#include <HUNT/AssetManager.h>
 #include <SDL3/SDL.h>
 
 #include <algorithm>
@@ -29,6 +28,7 @@ namespace HUNT {
         std::unique_ptr<SDL_Window, WindowDeleter> window;
         std::unique_ptr<Renderer> renderer;
         std::unique_ptr<InputHandler> inputHandler;
+        std::unique_ptr<AssetManager> assetManager;
 
         bool sdlInitialised = false;
         bool quit = false;
@@ -41,6 +41,8 @@ namespace HUNT {
         void Shutdown() noexcept {
             renderer.reset();
             window.reset();
+            inputHandler.reset();
+            assetManager.reset();
 
             if (sdlInitialised)
                 SDL_Quit();
@@ -89,11 +91,16 @@ namespace HUNT {
             impl_->Shutdown();
             return false;
         }
-
         impl_->renderer->SetVSync(true);
-        //make input handler
+
+        //INIT ASSETMANAGER HERE
+        impl_->assetManager = std::make_unique<AssetManager>(impl_->renderer.get());
+        
+        //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
+
         return true;
+
     }
 
 	// This is the main loop of the engine. It handles events, updates, and rendering.
@@ -163,6 +170,11 @@ namespace HUNT {
     InputHandler& Engine::GetInput()
     {
         return *impl_->inputHandler;
+    }
+
+    AssetManager& Engine::GetAssetManager()
+    {
+        return *impl_->assetManager;
     }
 
     void Engine::lockMouse(bool in)
