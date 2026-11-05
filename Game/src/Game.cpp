@@ -51,7 +51,7 @@ namespace HUNTgame {
     
         //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
-       
+       //Test
         
         assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
        HUNT::Material bunnyMat;
