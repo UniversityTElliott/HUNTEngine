@@ -3,6 +3,7 @@
 #include <SDL3_image/SDL_image.h>
 namespace HUNT
 {
+
     struct Texture
     {
         SDL_GPUTexture* gpuTexture = nullptr;

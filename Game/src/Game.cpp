@@ -3,11 +3,10 @@
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
-#include <HUNT/AssetManager.h>
-#include <HUNT/HUNTMath/mathFunctions.h>
+#include <HUNT/AssetHandler.h>
+#include <HUNT/Math/mathFunctions.h>
 #include <algorithm>
 #include <cmath>
-#include <imgui.h>
 #include <SDL3/SDL_log.h> //FOR TESTING
 
 namespace HUNTgame {
@@ -18,7 +17,7 @@ namespace HUNTgame {
 
     bool DemoGame::Start(HUNT::Engine& engine) {
         auto& renderer = engine.GetRenderer();
-        auto& assetManager = engine.GetAssetManager();
+        auto& AssetHandler = engine.GetAssetHandler();
 
         renderer.InitGPU();
      
@@ -54,20 +53,20 @@ namespace HUNTgame {
         //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
        //Test
-        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
+        AssetHandler.LoadTextureToAssetHandler("TestAssets/bunny.png","bunny");
         
        HUNT::Material bunnyMat;
-       bunnyMat.SetTexture(assetManager.GetTexture("bunny"));
-        assetManager.LoadMeshToAssetManager(data1,bunnyMat,"Cube");
+       bunnyMat.SetTexture(AssetHandler.GetTexture("bunny"));
+        AssetHandler.LoadMeshToAssetHandler(data1,bunnyMat,"Cube");
         
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
-       meshComp->setMesh(assetManager.GetMesh("Cube"));
+       meshComp->setMesh(AssetHandler.GetMesh("Cube"));
        
        //THIS IS ALL A TEST
 
-        assetManager.LoadModelToAssetManager("TestAssets/Goron.obj","Goron");
+        AssetHandler.LoadModelToAssetHandler("TestAssets/Goron.obj","Goron");
        auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
-       modelComp->setModel(assetManager.GetModel("Goron"));
+       modelComp->setModel(AssetHandler.GetModel("Goron"));
       
        myCamera.setPosition(0.f, 0.f, -10.f);
        myCamera.setRotation(0.f, 0.f, 0.f);

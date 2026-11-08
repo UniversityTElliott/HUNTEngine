@@ -1,6 +1,6 @@
 
 #include <HUNT/Editor/EditorUI.h>
-#include <HUNT/HUNTMath/float2.h>
+#include <HUNT/Math/float2.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <imgui.h>
 
@@ -64,9 +64,9 @@ namespace HUNT {
         DrawInspector();
         ImGui::EndChild();
         ImGui::EndChild();
+  
 
-        ImGui::BeginChild("BottomPanel",ImVec2(available.x, bottomHeight),ImGuiChildFlags_Borders);
-
+        ImGui::BeginChild("BottomPanel", ImVec2(available.x, bottomHeight), ImGuiChildFlags_Borders);
         DrawMiscArea();
         ImGui::EndChild();
         ImGui::End();

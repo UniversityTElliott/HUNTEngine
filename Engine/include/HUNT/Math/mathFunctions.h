@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
-#include <HUNT/HUNTMath/mat4.h>
+#include <HUNT/Math/mat4.h>
 
 namespace HUNT
 {

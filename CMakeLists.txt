@@ -112,11 +112,16 @@ add_library(Engine STATIC
     Engine/src/EditorUI.cpp
     Engine/include/HUNT/Input/InputHandler.h
     Engine/include/HUNT/Editor/EditorUI.h
-    Engine/include/HUNT/AssetManager.h
-    Engine/src/AssetManager.cpp
+    Engine/include/HUNT/AssetHandler.h
+    Engine/src/AssetHandler.cpp
     Engine/src/Camera.cpp
     Engine/include/HUNT/Camera/Camera.h
     Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h
+    Engine/include/HUNT/SceneHandler.h
+    Engine/src/SceneHandler.cpp
+    Engine/include/HUNT/Scene/Scene.h
+    Engine/include/HUNT/Scene/Scene.cpp
+
 )
 
 add_library(Game STATIC Game/src/Game.cpp "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h")
@@ -130,7 +135,7 @@ target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
 target_link_libraries(Engine PRIVATE SDL3::SDL3)
-target_link_libraries(Engine PUBLIC imgui) 
+target_link_libraries(Engine PRIVATE imgui) 
 target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) 
 target_link_libraries(Engine PRIVATE  assimp::assimp) 
 target_link_libraries(Engine PUBLIC glm::glm)

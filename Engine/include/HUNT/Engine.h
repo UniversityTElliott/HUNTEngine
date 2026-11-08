@@ -9,7 +9,7 @@ namespace HUNT {
     class Renderer;
     class Engine;
     class InputHandler;
-    class AssetManager;
+    class AssetHandler;
     // Application is what the end developer builds to use your engine.
     // Its lifetime is managed by the engine. The end developer respondes to the calls to Start, Render, etc
     class Application {
@@ -42,7 +42,7 @@ namespace HUNT {
 
         Renderer& GetRenderer();
         InputHandler& GetInput();
-        AssetManager& GetAssetManager();
+        AssetHandler& GetAssetHandler();
         void lockMouse(bool in);
         void resetMousePosition();
 

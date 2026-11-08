@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
-#include <HUNT/HUNTMath/float2.h>
-#include <HUNT/HUNTMath/float3.h>
-#include <HUNT/HUNTMath/float4.h>
+#include <HUNT/Math/float2.h>
+#include <HUNT/Math/float3.h>
+#include <HUNT/Math/float4.h>
 
 namespace HUNT {
 

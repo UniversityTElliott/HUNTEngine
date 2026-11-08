@@ -2,7 +2,7 @@
 #pragma once
 
 #include <HUNT/Graphics/HUNTMesh/Texture.h>
-#include <HUNT/HUNTMath/float4.h>
+#include <HUNT/Math/float4.h>
 
 namespace HUNT
 {

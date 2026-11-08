@@ -1,8 +1,8 @@
 //style and ordering taken from shaders project
 
-#include <HUNT/HUNTMath/float3.h>
-#include <HUNT/HUNTMath/float4.h>
-#include <HUNT/HUNTMath/mat4.h>
+#include <HUNT/Math/float3.h>
+#include <HUNT/Math/float4.h>
+#include <HUNT/Math/mat4.h>
 namespace HUNT {
 	class Camera
 	{

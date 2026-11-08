@@ -1,4 +1,4 @@
-#include "HUNT/AssetManager.h"
+#include "HUNT/AssetHandler.h"
 #include <HUNT/Graphics/HUNTMesh/Material.h>
 #include <HUNT/Graphics/HUNTMesh/Texture.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
@@ -12,7 +12,7 @@
 
 namespace HUNT
 {
-    struct AssetManager::Impl
+    struct AssetHandler::Impl
     {
         Renderer* renderer;
 
@@ -40,20 +40,20 @@ namespace HUNT
         }
     };
 
-    AssetManager::AssetManager(Renderer* renderer)
+    AssetHandler::AssetHandler(Renderer* renderer)
         : impl_(std::make_unique<Impl>(renderer))
     {
     }
 
 
 
-    AssetManager::~AssetManager() = default;
+    AssetHandler::~AssetHandler() = default;
 
 
 
 
 
-    void AssetManager::LoadTextureToAssetManager(const char* path, std::string name)
+    void AssetHandler::LoadTextureToAssetHandler(const char* path, std::string name)
     {
 
         // Check if this logical asset name already exis
@@ -90,7 +90,7 @@ namespace HUNT
         // Store ID
         impl_->textureLookup.emplace(std::move(name), textureID);
     }
-    void AssetManager::LoadModelToAssetManager(const char* path, std::string name)
+    void AssetHandler::LoadModelToAssetHandler(const char* path, std::string name)
     {
         Assimp::Importer importer;
 
@@ -147,7 +147,7 @@ namespace HUNT
             {
                 std::string fullPath = modelPath + texturePath.C_Str();
 
-                LoadTextureToAssetManager(fullPath.c_str(), name);
+                LoadTextureToAssetHandler(fullPath.c_str(), name);
                 HUNT::Texture* texture = GetTexture(name);
                 material.SetTexture(texture);
             }
@@ -175,7 +175,7 @@ namespace HUNT
     }
 
 
-    void AssetManager::LoadMeshToAssetManager(HUNT::MeshData meshDataIn, HUNT::Material materialIn, std::string name)
+    void AssetHandler::LoadMeshToAssetHandler(HUNT::MeshData meshDataIn, HUNT::Material materialIn, std::string name)
     {
         auto meshID = impl_->meshLookup.find(name);
 
@@ -197,7 +197,7 @@ namespace HUNT
     }
 
 
-    Texture* AssetManager::GetTexture(const std::string& name)
+    Texture* AssetHandler::GetTexture(const std::string& name)
     {
         //Check for the ID
         auto texID = impl_->textureLookup.find(name);
@@ -210,7 +210,7 @@ namespace HUNT
         return impl_->renderer->GetLoadedTexture(texID->second);
     }
 
-    Model* AssetManager::GetModel(const std::string& name)
+    Model* AssetHandler::GetModel(const std::string& name)
     {
         //Check for the ID
         auto modelID = impl_->modelLookup.find(name);
@@ -223,7 +223,7 @@ namespace HUNT
         return impl_->models.at(modelID->second).get();
     }
 
-    Mesh* AssetManager::GetMesh(const std::string& name)
+    Mesh* AssetHandler::GetMesh(const std::string& name)
     {
         //Check for the ID
         auto meshID = impl_->meshLookup.find(name);

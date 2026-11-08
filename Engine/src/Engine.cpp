@@ -2,7 +2,7 @@
 #include <HUNT/Engine.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
-#include <HUNT/AssetManager.h>
+#include <HUNT/AssetHandler.h>
 #include <SDL3/SDL.h>
 #include <HUNT/Editor/EditorUI.h>
 #include <algorithm>
@@ -32,7 +32,7 @@ namespace HUNT {
         std::unique_ptr<SDL_Window, WindowDeleter> window;
         std::unique_ptr<Renderer> renderer;
         std::unique_ptr<InputHandler> inputHandler;
-        std::unique_ptr<AssetManager> assetManager;
+        std::unique_ptr<AssetHandler> AssetHandler;
         std::unique_ptr<EditorUI> editorUI;
 
         bool sdlInitialised = false;
@@ -47,7 +47,7 @@ namespace HUNT {
             renderer.reset();
             window.reset();
             inputHandler.reset();
-            assetManager.reset();
+            AssetHandler.reset();
 
             if (sdlInitialised)
                 SDL_Quit();
@@ -101,8 +101,8 @@ namespace HUNT {
         }
         impl_->renderer->SetVSync(true);
 
-        //INIT ASSETMANAGER HERE
-        impl_->assetManager = std::make_unique<AssetManager>(impl_->renderer.get());
+        //INIT AssetHandler HERE
+        impl_->AssetHandler = std::make_unique<AssetHandler>(impl_->renderer.get());
         
         //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
@@ -191,9 +191,9 @@ namespace HUNT {
         return *impl_->inputHandler;
     }
 
-    AssetManager& Engine::GetAssetManager()
+    AssetHandler& Engine::GetAssetHandler()
     {
-        return *impl_->assetManager;
+        return *impl_->AssetHandler;
     }
 
     void Engine::lockMouse(bool in)

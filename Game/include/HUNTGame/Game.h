@@ -2,10 +2,10 @@
 
 #include <HUNT/Engine.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
-#include <HUNT/HUNTObjects/HUNTObject.h>
+#include <HUNT/Objects/HUNTObject.h>
 #include <HUNT/Camera/Camera.h>
-#include <HUNT/HUNTObjects/HUNTComponents/HUNTMeshComponent.h>
-#include <HUNT/HUNTObjects/HUNTComponents/HUNTModelComponent.h>
+#include <HUNT/Objects/Components/HUNTMeshComponent.h>
+#include <HUNT/Objects/Components/HUNTModelComponent.h>
 
 #include <cstdint>
 

@@ -1,6 +1,6 @@
 
 #include <HUNT/Camera/Camera.h>
-#include <HUNT/HUNTMath/mathFunctions.h>
+#include <HUNT/Math/mathFunctions.h>
 namespace HUNT
 {
 	Camera::Camera()

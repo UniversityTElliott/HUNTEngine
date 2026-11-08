@@ -2,7 +2,7 @@
 #pragma once
 #include<vector>
 #include <memory>
-#include <HUNT/HUNTObjects/HUNTComponents/HUNTBaseComponent.h>
+#include <HUNT/Objects/Components/HUNTBaseComponent.h>
 namespace HUNT {
 
     class HUNTObject

@@ -6,7 +6,7 @@
 #include <HUNT/Graphics/HUNTMesh/Model.h>
 
 #include <HUNT/Graphics/Renderer.h>
-#include <HUNT/AssetManager.h>
+#include <HUNT/AssetHandler.h>
 
 
 

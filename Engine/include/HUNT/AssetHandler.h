@@ -19,16 +19,16 @@ namespace HUNT
 	class Material;
 
 
-	class AssetManager
+	class AssetHandler
 	{
 	public:
-		 AssetManager(Renderer* renderer);
-		~AssetManager();
+		 AssetHandler(Renderer* renderer);
+		~AssetHandler();
 
 		//Loads single mesh models.
-		 void LoadTextureToAssetManager(const char* path, std::string name);
-		 void LoadModelToAssetManager(const char* path, std::string name);
-		 void LoadMeshToAssetManager(MeshData meshDataIn, Material materialIn, std::string name);
+		 void LoadTextureToAssetHandler(const char* path, std::string name);
+		 void LoadModelToAssetHandler(const char* path, std::string name);
+		 void LoadMeshToAssetHandler(MeshData meshDataIn, Material materialIn, std::string name);
 		 //All of these are pointers as they are owned HERE or by RENDERER and everything else just peeks at them
 		 Texture* GetTexture(const std::string& name);
 		 Model* GetModel(const std::string& name);
