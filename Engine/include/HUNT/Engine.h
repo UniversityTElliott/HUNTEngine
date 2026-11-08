@@ -38,6 +38,8 @@ namespace HUNT {
         int     Run(Application& application);
         void    Quit() noexcept;
 
+        void RenderFrame(); //LATER SHCNE THIS TO HANDLE SCENES
+
         Renderer& GetRenderer();
         InputHandler& GetInput();
         AssetManager& GetAssetManager();

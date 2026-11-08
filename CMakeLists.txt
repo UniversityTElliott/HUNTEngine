@@ -109,7 +109,9 @@ add_library(Engine STATIC
     Engine/src/Engine.cpp
     Engine/src/Renderer.cpp
     Engine/src/InputHandler.cpp
+    Engine/src/EditorUI.cpp
     Engine/include/HUNT/Input/InputHandler.h
+    Engine/include/HUNT/Editor/EditorUI.h
     Engine/include/HUNT/AssetManager.h
     Engine/src/AssetManager.cpp
     Engine/src/Camera.cpp

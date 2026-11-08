@@ -1,9 +1,10 @@
-﻿#include <HUNT/Engine.h>
+﻿
+#include <HUNT/Engine.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
 #include <HUNT/AssetManager.h>
 #include <SDL3/SDL.h>
-
+#include <HUNT/Editor/EditorUI.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -32,6 +33,7 @@ namespace HUNT {
         std::unique_ptr<Renderer> renderer;
         std::unique_ptr<InputHandler> inputHandler;
         std::unique_ptr<AssetManager> assetManager;
+        std::unique_ptr<EditorUI> editorUI;
 
         bool sdlInitialised = false;
         bool quit = false;
@@ -105,6 +107,9 @@ namespace HUNT {
         //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
 
+        //INIT EDITORUI HERE
+        impl_->editorUI = std::make_unique<EditorUI>(impl_->renderer.get());
+
         return true;
 
     }
@@ -142,8 +147,11 @@ namespace HUNT {
 
                 //TODO: ADD ERROR CHECKS HERE MAYBE
                 application.HandleInput(*this);
-                application.Render(*this);
 
+                impl_->renderer.get()->BeginFrame();
+                application.Render(*this);
+                impl_->editorUI.get()->BuildUI();
+                impl_->renderer.get()->EndFrame();
             
 
 				//If we're not using vsync, we need to manually delay to avoid a busy loop that maxes CPU usage.
@@ -168,6 +176,11 @@ namespace HUNT {
     }
 
     void Engine::Quit() noexcept { impl_->quit = true; }
+
+    void Engine::RenderFrame()
+    {
+       
+    }
 
     Renderer& Engine::GetRenderer()
     {

@@ -14,6 +14,7 @@
 
 struct SDL_Window;
 struct SDL_GPUBuffer;
+struct SDL_GPUTexture;
 union SDL_Event;
 
 namespace HUNT {
@@ -32,11 +33,15 @@ namespace HUNT {
         void CreatePipeline();
         void CreateSampler();
         void CreateDepthSampler();
+        void CreateViewportTexture();
         //ImGUI stuff
         void InitImGui();
         void ProcessImGuiEvent(const SDL_Event& event);
         void BeginImGuiFrame();
-        
+        //EditorUI stuff its kinda imgui so below it
+        void SetViewportSize(int x, int y);
+        SDL_GPUTexture* GetViewportTexture() const;
+        void RemakeViewport();
         //Camera Stuff
         void SetCameraMatrix(const MatrixBufferType& matrices);
         void SetVSync(bool enabled);

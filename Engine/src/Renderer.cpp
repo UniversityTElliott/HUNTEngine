@@ -1,4 +1,5 @@
 
+
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
@@ -35,9 +36,9 @@ namespace HUNT {
         struct GPUDeviceDeleter {
             void operator()(SDL_GPUDevice* GPUDevice) const noexcept { SDL_DestroyGPUDevice(GPUDevice); }
         };
-        /*  struct GPUPipelineDeleter {
-              void operator()(SDL_GPUDevice* GPUDevice, SDL_GPUGraphicsPipeline* gpuPipeline) const noexcept {SDL_ReleaseGPUGraphicsPipeline(GPUDevice,gpuPipeline); }
-          };*/
+       //ALL OF THIS NEEDS CLEANING PLEASE DO THAT!!!!
+
+
 
        HUNT::float4 defaultColour{0.f,0.f,0.f,1.f};
        int width = 0;
@@ -60,6 +61,17 @@ namespace HUNT {
         .view = HUNT::mat4(1.f),
         .projection = glm::perspective(90.f,1080.f/720.f,0.1f,200.f), //BUILD THIS FROM PASSED IN DATA
         };
+
+        SDL_GPUTexture* viewportTexture = nullptr;
+        int viewportWidth = 0;
+        int viewportHeight = 0;
+        //So we dont change stuff mid updatae
+        int newViewportWidth = 0;
+        int newViewportHeight = 0;
+        bool viewportNeedsResize = false;
+
+
+
         std::unordered_map<uint32_t, MeshGPUBuffers> allStoredMeshBuffers;
         std::vector<std::unique_ptr<HUNT::Texture>> loadedTextureVector;
      
@@ -102,6 +114,21 @@ namespace HUNT {
                 SDL_ReleaseGPUSampler(gpuDevice.get(), textureSampler);
                 textureSampler = nullptr;
             }
+            //VP
+            if (viewportTexture)
+            {
+                SDL_ReleaseGPUTexture(gpuDevice.get(),viewportTexture);
+                viewportTexture = nullptr;
+            }
+            //DT
+            if (depthTexture)
+            {
+                SDL_ReleaseGPUTexture(gpuDevice.get(), depthTexture);
+                depthTexture = nullptr;
+            }
+
+
+
 
             //CleanupIMGUI
             ImGui_ImplSDLGPU3_Shutdown();
@@ -163,6 +190,14 @@ namespace HUNT {
 
         SDL_GetWindowSize(impl_->window, &impl_->width, &impl_->height);
 
+        // Initially use the window dimensions
+        impl_->viewportWidth = impl_->width;
+        impl_->viewportHeight = impl_->height;
+
+        impl_->newViewportWidth = impl_->viewportWidth;
+        impl_->newViewportHeight = impl_->viewportHeight;
+        
+        CreateViewportTexture();
         CreateDepthSampler();
         CreateSampler();
         CreatePipeline();
@@ -407,6 +442,34 @@ namespace HUNT {
 
         impl_->depthTexture = (SDL_CreateGPUTexture(impl_->gpuDevice.get(), &depthInfo));
     }
+    void Renderer::CreateViewportTexture()
+    {
+        //Error check for size
+        if (impl_->viewportWidth <= 0 ||
+            impl_->viewportHeight <= 0)
+        {
+            return;
+        }
+
+        SDL_GPUTextureCreateInfo viewportInfo{
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GetGPUSwapchainTextureFormat(impl_->gpuDevice.get(), impl_->window),
+        .usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER,
+        .width = static_cast<Uint32>(impl_->viewportWidth), //narrowing conversion
+        .height = static_cast<Uint32>(impl_->viewportHeight),
+        .layer_count_or_depth = 1,
+        .num_levels =1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1, //SAME AS IMGUI CHANGE WITH MORE SAMPLERS //MAYBE MAKE THIS SOMETHING THATS STORED AND INCREASES
+        };
+
+        impl_->viewportTexture =SDL_CreateGPUTexture(impl_->gpuDevice.get(),&viewportInfo);
+
+        if (impl_->viewportTexture == nullptr)
+        {
+            SDL_Log("Failed to create viewport texture: %s",SDL_GetError());
+        }
+
+    }
     //---------------------IMGUI-------------------------------
     void Renderer::InitImGui()
     {
@@ -450,6 +513,58 @@ namespace HUNT {
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+    }
+    SDL_GPUTexture* Renderer::GetViewportTexture() const
+    {
+        return impl_->viewportTexture;
+    }
+    void Renderer::RemakeViewport()
+    {
+        //Early exit
+        if (!impl_->viewportNeedsResize)
+        {
+            return;
+        }
+
+        //Release old stuff
+        if (impl_->viewportTexture)
+        {
+            SDL_ReleaseGPUTexture(impl_->gpuDevice.get(),impl_->viewportTexture);
+            impl_->viewportTexture = nullptr;
+        }
+        if (impl_->depthTexture)
+        {
+            SDL_ReleaseGPUTexture(impl_->gpuDevice.get(),impl_->depthTexture);
+            impl_->depthTexture = nullptr;
+        }
+
+        //Fix dimensions
+        impl_->viewportWidth =impl_->newViewportWidth;
+        impl_->viewportHeight =impl_->newViewportHeight;
+
+        //Recreate for new VP
+        CreateViewportTexture();
+        CreateDepthSampler();
+
+        impl_->viewportNeedsResize = false;
+    }
+    void Renderer::SetViewportSize(int x, int y)
+    {
+        //ignore if negative
+        if (x <= 0 || y <= 0)
+        {
+            return;
+        }
+        //Ignore if same
+        if (x == impl_->newViewportWidth && y == impl_->newViewportHeight)
+        {
+            return;
+        }
+
+        impl_->newViewportWidth = x;
+        impl_->newViewportHeight = y;
+        impl_->viewportNeedsResize = true;
+
     }
     //-----------------CAMERA--------------------------
     void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
@@ -651,10 +766,13 @@ namespace HUNT {
         return impl_->loadedTextureVector[textureID].get();
     }
 
-    //BELOW HERE IS THE RENDERING CALLS---------------------------------------------------
+    //----------------------BELOW HERE IS THE RENDERING CALLS---------------------------------------------------
 
     void Renderer::BeginFrame()
     {
+        //This does any resize before we use the gpu IE safely
+        RemakeViewport();
+
         //Make command buffer and swapchain texture
         impl_->renderCommandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
         
@@ -666,7 +784,7 @@ namespace HUNT {
         BeginImGuiFrame();
 
         SDL_GPUColorTargetInfo colorTargetInfo = {
-          .texture = impl_->swapchainTexture,
+          .texture = impl_->viewportTexture,
           .clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w},
           .load_op = SDL_GPU_LOADOP_CLEAR,
           .store_op = SDL_GPU_STOREOP_STORE,

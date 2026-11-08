@@ -149,35 +149,9 @@ namespace HUNTgame {
 
         renderer.SetCameraMatrix(matrices);
 
-        renderer.BeginFrame();
         
         triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
         modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
-
-        ImGui::Begin("HUNT Engine Debug");
-
-        ImGui::Text("Welcome to HUNT!");
-
-        ImGui::Text(
-            "FPS: %.1f",
-            ImGui::GetIO().Framerate
-        );
-
-        ImGui::Separator();
-
-        static bool showWireframe = false;
-
-        ImGui::Checkbox(
-            "Wireframe",
-            &showWireframe
-        );
-        ImGui::End();
-
-
-
-
-
-        renderer.EndFrame();
 
         const float time = previousTime_ + (currentTime_ - previousTime_);
         const int glow = static_cast<int>(16.0f * (1.0f + std::sin(time)));
