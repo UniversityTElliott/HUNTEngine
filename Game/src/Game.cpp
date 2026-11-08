@@ -53,11 +53,11 @@ namespace HUNTgame {
 
        //Test
         
-        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
        HUNT::Material bunnyMat;
        bunnyMat.SetTexture(assetManager.GetTexture("bunny"));
+        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
+        assetManager.LoadMeshToAssetManager(data1,bunnyMat,"Cube");
         
-       assetManager.LoadMeshToAssetManager(data1,bunnyMat,"Cube");
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
        meshComp->setMesh(assetManager.GetMesh("Cube"));
        
@@ -153,15 +153,7 @@ namespace HUNTgame {
         modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
 
 
-
-
         renderer.EndFrame();
-
-
-
-
-
-
 
         const float time = previousTime_ + (currentTime_ - previousTime_);
         const int glow = static_cast<int>(16.0f * (1.0f + std::sin(time)));

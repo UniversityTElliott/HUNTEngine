@@ -690,6 +690,8 @@ namespace HUNT {
 
     void Renderer::EndFrame() {
 
+        //OPTIMISE SO IT BATCHES STUFF AND ONLY SENDS IT ONCE TO GPU AT START OF HERE OR END OF ABOVE^^^
+
         SDL_EndGPURenderPass(impl_->renderPass); //End Render Pass.
         impl_->renderPass = nullptr;
 
