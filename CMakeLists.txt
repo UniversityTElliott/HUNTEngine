@@ -87,7 +87,7 @@ target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}/backends
 )
 
-target_sources(imgui PUBLIC
+target_sources(imgui PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
@@ -127,10 +127,10 @@ add_executable(HUNTGame GameApp/src/HUNTGame.cpp)
 target_include_directories(Engine PUBLIC Engine/include)
 target_include_directories(Game PUBLIC Game/include)
 
-target_link_libraries(Engine PRIVATE SDL3::SDL3) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
-target_link_libraries(Engine PRIVATE imgui) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
-target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
-target_link_libraries(Engine PRIVATE  assimp::assimp) #public for meshBuffers and keys, SO much of the engine needs SDL as its literally an sdl engine so surely this is fine
+target_link_libraries(Engine PRIVATE SDL3::SDL3)
+target_link_libraries(Engine PUBLIC imgui) 
+target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) 
+target_link_libraries(Engine PRIVATE  assimp::assimp) 
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Game PUBLIC Engine)
 

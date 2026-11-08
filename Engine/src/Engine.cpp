@@ -11,6 +11,9 @@
 #include <stdexcept>
 #include <string>
 
+
+
+
 namespace HUNT {
     namespace {
         constexpr double fixedStepTime = 1.0 / 60.0;
@@ -53,6 +56,9 @@ namespace HUNT {
         void PollEvents(Renderer* rendererIn) {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
+
+                rendererIn->ProcessImGuiEvent(event); //Process Imgui first
+
                 if (event.type == SDL_EVENT_QUIT || event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
                     quit = true;
                 }

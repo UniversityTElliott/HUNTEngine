@@ -14,6 +14,7 @@
 
 struct SDL_Window;
 struct SDL_GPUBuffer;
+union SDL_Event;
 
 namespace HUNT {
 
@@ -31,6 +32,10 @@ namespace HUNT {
         void CreatePipeline();
         void CreateSampler();
         void CreateDepthSampler();
+        //ImGUI stuff
+        void InitImGui();
+        void ProcessImGuiEvent(const SDL_Event& event);
+        void BeginImGuiFrame();
         
         //Camera Stuff
         void SetCameraMatrix(const MatrixBufferType& matrices);

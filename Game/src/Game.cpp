@@ -7,7 +7,9 @@
 #include <HUNT/HUNTMath/mathFunctions.h>
 #include <algorithm>
 #include <cmath>
+#include <imgui.h>
 #include <SDL3/SDL_log.h> //FOR TESTING
+
 namespace HUNTgame {
 
     DemoGame::DemoGame(std::uint8_t red, std::uint8_t green, std::uint8_t blue) noexcept
@@ -52,10 +54,10 @@ namespace HUNTgame {
         //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
        //Test
+        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
         
        HUNT::Material bunnyMat;
        bunnyMat.SetTexture(assetManager.GetTexture("bunny"));
-        assetManager.LoadTextureToAssetManager("TestAssets/bunny.png","bunny");
         assetManager.LoadMeshToAssetManager(data1,bunnyMat,"Cube");
         
        auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
@@ -151,6 +153,28 @@ namespace HUNTgame {
         
         triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
         modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
+
+        ImGui::Begin("HUNT Engine Debug");
+
+        ImGui::Text("Welcome to HUNT!");
+
+        ImGui::Text(
+            "FPS: %.1f",
+            ImGui::GetIO().Framerate
+        );
+
+        ImGui::Separator();
+
+        static bool showWireframe = false;
+
+        ImGui::Checkbox(
+            "Wireframe",
+            &showWireframe
+        );
+        ImGui::End();
+
+
+
 
 
         renderer.EndFrame();

@@ -8,6 +8,9 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlgpu3.h>
 #include <array>
 #include <algorithm>
 #include <chrono>
@@ -39,7 +42,7 @@ namespace HUNT {
        HUNT::float4 defaultColour{0.f,0.f,0.f,1.f};
        int width = 0;
        int height = 0;
-
+  
         std::unique_ptr<SDL_Renderer, RendererDeleter> renderer3D;
         std::unique_ptr<SDL_GPUDevice, GPUDeviceDeleter> gpuDevice;
         SDL_GPUTexture* depthTexture = nullptr;
@@ -50,6 +53,8 @@ namespace HUNT {
         //  std::unique_ptr<SDL_GPUGraphicsPipeline, GPUPipelineDeleter> gpuPipeline;
         SDL_GPUGraphicsPipeline* gpuPipeline = nullptr;
         SDL_GPUSampler* textureSampler = nullptr;
+        SDL_GPUTexture* swapchainTexture = nullptr;
+
         HUNT::MatrixBufferType cameraMatrix{
         .world = HUNT::mat4(1.f),
         .view = HUNT::mat4(1.f),
@@ -97,6 +102,13 @@ namespace HUNT {
                 SDL_ReleaseGPUSampler(gpuDevice.get(), textureSampler);
                 textureSampler = nullptr;
             }
+
+            //CleanupIMGUI
+            ImGui_ImplSDLGPU3_Shutdown();
+            ImGui_ImplSDL3_Shutdown();
+
+            ImGui::DestroyContext();
+
 
             //Cleanup gpu pipeline stuff
             if (gpuPipeline) {
@@ -154,6 +166,7 @@ namespace HUNT {
         CreateDepthSampler();
         CreateSampler();
         CreatePipeline();
+        InitImGui();
         
     }
     //Helper function for the pipeline creation, makes
@@ -394,6 +407,50 @@ namespace HUNT {
 
         impl_->depthTexture = (SDL_CreateGPUTexture(impl_->gpuDevice.get(), &depthInfo));
     }
+    //---------------------IMGUI-------------------------------
+    void Renderer::InitImGui()
+    {
+        //BoilerplateImgui with SDL3
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        ImGui::StyleColorsDark();
+        // SDL3 platform backend
+        if (!ImGui_ImplSDL3_InitForSDLGPU(impl_->window))
+        {
+            SDL_Log("Failed to initialise ImGui");
+            return;
+        }
+
+
+        ImGui_ImplSDLGPU3_InitInfo initInfo{};
+
+        initInfo.Device = impl_->gpuDevice.get();
+        initInfo.ColorTargetFormat =SDL_GetGPUSwapchainTextureFormat(impl_->gpuDevice.get(),impl_->window);
+
+        initInfo.MSAASamples = SDL_GPU_SAMPLECOUNT_1; //CHANGE AS SAMPLE COUNT INCREASES!
+
+        if (!ImGui_ImplSDLGPU3_Init(&initInfo))
+        {
+            SDL_Log("Failed to initialise ImGui SDL_GPU backend");
+            ImGui_ImplSDL3_Shutdown();
+            ImGui::DestroyContext();
+            return;
+        }
+
+    }
+    void Renderer::ProcessImGuiEvent(const SDL_Event& event) //keeps this inside renderer so engine doesnt need IMGUI info
+    {
+        ImGui_ImplSDL3_ProcessEvent(&event); 
+    }
+    void Renderer::BeginImGuiFrame()
+    {
+        //idk if I need both but works?
+        ImGui_ImplSDLGPU3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+    }
     //-----------------CAMERA--------------------------
     void Renderer::SetCameraMatrix(const MatrixBufferType& matrices)
     {
@@ -601,15 +658,15 @@ namespace HUNT {
         //Make command buffer and swapchain texture
         impl_->renderCommandBuffer = (SDL_AcquireGPUCommandBuffer(impl_->gpuDevice.get()));
         
-        SDL_GPUTexture* swapchainTexture = nullptr;
-
-        if (!impl_->renderCommandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->renderCommandBuffer, impl_->window, &swapchainTexture, nullptr, nullptr))
+        if (!impl_->renderCommandBuffer || !SDL_WaitAndAcquireGPUSwapchainTexture(impl_->renderCommandBuffer, impl_->window, &impl_->swapchainTexture, nullptr, nullptr))
         {
             // Explode
         }
+        //StartIMGUI
+        BeginImGuiFrame();
 
         SDL_GPUColorTargetInfo colorTargetInfo = {
-          .texture = swapchainTexture,
+          .texture = impl_->swapchainTexture,
           .clear_color = { impl_->defaultColour.x, impl_->defaultColour.y,impl_->defaultColour.z,impl_->defaultColour.w},
           .load_op = SDL_GPU_LOADOP_CLEAR,
           .store_op = SDL_GPU_STOREOP_STORE,
@@ -695,9 +752,27 @@ namespace HUNT {
         SDL_EndGPURenderPass(impl_->renderPass); //End Render Pass.
         impl_->renderPass = nullptr;
 
-        SDL_SubmitGPUCommandBuffer(impl_->renderCommandBuffer); //Submit to GPU.
-        impl_->renderCommandBuffer = nullptr;
+        //ImGUI HERE
 
+        ImGui::Render();
+        ImDrawData* drawData = ImGui::GetDrawData();
+        ImGui_ImplSDLGPU3_PrepareDrawData(drawData,impl_->renderCommandBuffer);
+        //IMGUI needs to do another renderpass like week 6 graphics
+        SDL_GPUColorTargetInfo imguiColorTarget{};
+        imguiColorTarget.texture = impl_->swapchainTexture;
+        imguiColorTarget.load_op = SDL_GPU_LOADOP_LOAD;
+        imguiColorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+        SDL_GPURenderPass* imguiRenderPass =SDL_BeginGPURenderPass(impl_->renderCommandBuffer,&imguiColorTarget,1,nullptr);
+        if (imguiRenderPass)
+        {
+            ImGui_ImplSDLGPU3_RenderDrawData(drawData,impl_->renderCommandBuffer,imguiRenderPass);
+            SDL_EndGPURenderPass(imguiRenderPass);
+        }
+         //Submit to GPU.
+        SDL_SubmitGPUCommandBuffer(impl_->renderCommandBuffer);
+        impl_->renderCommandBuffer = nullptr;
+        impl_->swapchainTexture = nullptr;
     }
 
 
