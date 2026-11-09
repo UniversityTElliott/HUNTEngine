@@ -27,7 +27,7 @@ namespace HUNT {
         void FixedUpdate() final {
 
         };
-        void Render(Renderer& rendererIn) {
+        void Render(Renderer& rendererIn) final {
             for (auto& model : model->getModelMeshes()) {
                 rendererIn.Render(model);
             }

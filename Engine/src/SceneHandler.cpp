@@ -1,8 +1,11 @@
 #include "HUNT/SceneHandler.h"
+#include "HUNT/Graphics/GPU/ShaderBuffers.h"
+#include "HUNT/Math/mathFunctions.h"
+#include "HUNT/Graphics/Renderer.h"
 
 namespace HUNT
 {
-    bool SceneHandler::SetActiveScene(Scene* scene)
+    bool SceneHandler::SetCurrentScene(Scene* scene)
     {
         if (!scene) {
             return false;
@@ -19,7 +22,7 @@ namespace HUNT
         return true;
     }
 
-    Scene* SceneHandler::GetActiveScene() const
+    Scene* SceneHandler::GetCurrentScene() const
     {
         return currentScene;
     }
@@ -30,7 +33,13 @@ namespace HUNT
         return allScenes;
     }
 
- 
+    void SceneHandler::Init(AssetHandler& asset)
+    {
+        if (currentScene && !currentScene->IsInitialised()) {
+            currentScene->setInitialised();
+            currentScene->Init(asset);
+        }
+    }
 
     void SceneHandler::Update(float deltaTime)
     {
@@ -38,16 +47,33 @@ namespace HUNT
             currentScene->Update(deltaTime);
         }
     }
-    void SceneHandler::FixedUpdate()
+    void SceneHandler::FixedUpdate(InputHandler& input)
     {
         if (currentScene) {
-            currentScene->FixedUpdate();
+            currentScene->FixedUpdate(input);
         }
     }
 
-    void SceneHandler::Render()
+    void SceneHandler::Render(Renderer& renderer)
     {
-        if (currentScene)
-            currentScene->Render();
+        Camera* camera = currentScene->GetActiveCamera();
+
+        if (camera)
+        {
+            HUNT::MatrixBufferType matrices = HUNT::makeGPUMatrix(HUNT::mat4(1.f), camera->getViewMatrix(), HUNT::perspectiveLH(HUNT::toRadians(90.f), 1080.f / 720.f, 0.1f, 200.f));
+
+
+            // Set projection here
+            renderer.SetCameraMatrix(matrices);
+        }
+
+
+
+        if (currentScene) {
+            for (const auto& object : currentScene->GetObjects())
+            {
+                object->Render(renderer);
+            }
+        }
     }
 }

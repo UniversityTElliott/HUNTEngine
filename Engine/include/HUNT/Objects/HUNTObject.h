@@ -4,6 +4,7 @@
 #include <memory>
 #include <HUNT/Objects/Components/HUNTBaseComponent.h>
 namespace HUNT {
+    class Renderer;
 
     class HUNTObject
     {
@@ -26,7 +27,11 @@ namespace HUNT {
                 component->FixedUpdate();
             }
         };
-
+        void Render(Renderer& renderer) {
+            for (auto& component : objectComponents) {
+                component->Render(renderer);
+            }
+        };
 
         template<class T> inline T* AddComponent()
         {

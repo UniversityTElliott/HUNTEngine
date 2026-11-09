@@ -24,7 +24,7 @@ namespace HUNT {
          void FixedUpdate() final {
 
         };
-         void Render(Renderer& rendererIn) {
+         void Render(Renderer& rendererIn) final{
              rendererIn.Render(*mesh);
          }
 

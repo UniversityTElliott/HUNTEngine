@@ -3,8 +3,12 @@
 #include <HUNTGame/Game.h>
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
+
+#include <HUNT/SceneHandler.h>
+
+#include <HUNTGame/MainScene.h>
 #include <HUNT/AssetHandler.h>
-#include <HUNT/Math/mathFunctions.h>
+
 #include <algorithm>
 #include <cmath>
 #include <SDL3/SDL_log.h> //FOR TESTING
@@ -16,123 +20,14 @@ namespace HUNTgame {
     }
 
     bool DemoGame::Start(HUNT::Engine& engine) {
-        auto& renderer = engine.GetRenderer();
-        auto& AssetHandler = engine.GetAssetHandler();
+        //Makes and sets main scene
+        engine.GetSceneHandler().CreateScene<MainScene>();
 
-        renderer.InitGPU();
-     
-        
-
-        HUNT::MeshData data1;
-        //CUBE!
-        data1.vertices = std::vector<HUNT::Vertex>{
-            // Back face (-Z)
-            HUNT::Vertex(HUNT::float3(-0.5f,  0.5f, -0.5f), HUNT::float4(1.f, 0.f, 0.f, 1.f), HUNT::float2(0.f, 0.f)),
-            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 1.f, 0.f, 1.f), HUNT::float2(0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f, -0.5f), HUNT::float4(0.f, 0.f, 1.f, 1.f), HUNT::float2(1.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f,  0.5f, -0.5f), HUNT::float4(1.f, 0.f, 1.f, 1.f), HUNT::float2(1.f, 0.f)),
-
-            // Front face (+Z)
-            HUNT::Vertex(HUNT::float3(-0.5f,  0.5f,  0.5f), HUNT::float4(1.f, 1.f, 0.f, 1.f), HUNT::float2(0.f, 0.f)),
-            HUNT::Vertex(HUNT::float3(-0.5f, -0.5f,  0.5f), HUNT::float4(0.f, 1.f, 1.f, 1.f), HUNT::float2(0.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f, -0.5f,  0.5f), HUNT::float4(1.f, 0.5f, 0.f, 1.f), HUNT::float2(1.f, 1.f)),
-            HUNT::Vertex(HUNT::float3(0.5f,  0.5f,  0.5f), HUNT::float4(1.f, 1.f, 1.f, 1.f), HUNT::float2(1.f, 0.f))
-        };
-
-        // Counter-clockwise order like CMP203
-        data1.indices = std::vector<uint32_t>{
-            0, 1, 2, 0, 2, 3,
-            4, 6, 5, 4, 7, 6,
-            4, 5, 1, 4, 1, 0,
-            3, 2, 6, 3, 6, 7,
-            4, 0, 3, 4, 3, 7,
-            1, 5, 6, 1, 6, 2
-        };
-
-    
-        //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
-
-       //Test
-        AssetHandler.LoadTextureToAssetHandler("TestAssets/bunny.png","bunny");
-        
-       HUNT::Material bunnyMat;
-       bunnyMat.SetTexture(AssetHandler.GetTexture("bunny"));
-        AssetHandler.LoadMeshToAssetHandler(data1,bunnyMat,"Cube");
-        
-       auto* meshComp =  triangle3.AddComponent<HUNT::HUNTMeshComponent>();
-       meshComp->setMesh(AssetHandler.GetMesh("Cube"));
-       
-       //THIS IS ALL A TEST
-
-        AssetHandler.LoadModelToAssetHandler("TestAssets/Goron.obj","Goron");
-       auto* modelComp = modelTest.AddComponent<HUNT::HUNTModelComponent>();
-       modelComp->setModel(AssetHandler.GetModel("Goron"));
-      
-       myCamera.setPosition(0.f, 0.f, -10.f);
-       myCamera.setRotation(0.f, 0.f, 0.f);
-
-        previousTime_ = currentTime_ = 0.0f;
         return true;
     }
   
-    //Make a handleInput function
-    //cycle anything that has a handeinput component and call it
+ 
     void DemoGame::FixedUpdate(HUNT::Engine& engine, float seconds) {
-        previousTime_ = currentTime_;
-        currentTime_ += seconds;
-        float speed = 0.8f;
-        float rotSpeed = 1.5f;
-        
-        auto& input = engine.GetInput();
-
-        input.update();
-
-        //Position
-      
-        if (input.isHeld(HUNT::key::w)) {
-            myCamera.moveForward(speed);
-        }
-        if (input.isHeld(HUNT::key::s)) {
-            myCamera.moveBackward(speed);
-        }
-        if (input.isHeld(HUNT::key::a)) {
-            myCamera.moveLeft(speed);
-        }
-        if (input.isHeld(HUNT::key::d)) {
-            myCamera.moveRight(speed);
-        }
-        if (input.isHeld(HUNT::key::q)) {
-            myCamera.rotate(-rotSpeed,0.f);
-        }
-        if (input.isHeld(HUNT::key::e)) {
-            myCamera.rotate(rotSpeed, 0.f);
-        }
-
-        if (input.isHeld(HUNT::key::space)) {
-            myCamera.moveUp(speed);
-        }
-        if (input.isHeld(HUNT::key::left_ctrl)) {
-            myCamera.moveUp(-speed);
-        }
-
-
-
-
-        if (input.isHeld(HUNT::mouse::rightMouse))
-        {
-            constexpr float sensitivity = 0.15f;
-            engine.lockMouse(true);
-            engine.resetMousePosition();
-            myCamera.rotate(input.getMouseXDifference() * sensitivity, -input.getMouseYDifference() * sensitivity);
-            
-        }
-        else {
-            engine.lockMouse(false);
-        }
-
-
-
-        //Rotate
 
     }
 
@@ -142,20 +37,7 @@ namespace HUNTgame {
     }
 
     void DemoGame::Render(HUNT::Engine& engine) {
-        auto& renderer = engine.GetRenderer();
         
-        HUNT::MatrixBufferType matrices = HUNT::makeGPUMatrix(HUNT::mat4(1.f), myCamera.getViewMatrix(), HUNT::perspectiveLH(HUNT::toRadians(90.f), 1080.f / 720.f, 0.1f, 200.f));
-
-        renderer.SetCameraMatrix(matrices);
-
-        
-        triangle3.GetComponent<HUNT::HUNTMeshComponent>()->Render(renderer);
-        modelTest.GetComponent<HUNT::HUNTModelComponent>()->Render(renderer);
-
-        const float time = previousTime_ + (currentTime_ - previousTime_);
-        const int glow = static_cast<int>(16.0f * (1.0f + std::sin(time)));
-        
-
     }
 
     void DemoGame::Stop(HUNT::Engine&) {}

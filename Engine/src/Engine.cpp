@@ -3,6 +3,7 @@
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Input/InputHandler.h>
 #include <HUNT/AssetHandler.h>
+#include <HUNT/SceneHandler.h>
 #include <SDL3/SDL.h>
 #include <HUNT/Editor/EditorUI.h>
 #include <algorithm>
@@ -32,8 +33,9 @@ namespace HUNT {
         std::unique_ptr<SDL_Window, WindowDeleter> window;
         std::unique_ptr<Renderer> renderer;
         std::unique_ptr<InputHandler> inputHandler;
-        std::unique_ptr<AssetHandler> AssetHandler;
+        std::unique_ptr<AssetHandler> assetHandler;
         std::unique_ptr<EditorUI> editorUI;
+        std::unique_ptr<SceneHandler> sceneHandler;
 
         bool sdlInitialised = false;
         bool quit = false;
@@ -47,7 +49,7 @@ namespace HUNT {
             renderer.reset();
             window.reset();
             inputHandler.reset();
-            AssetHandler.reset();
+            assetHandler.reset();
 
             if (sdlInitialised)
                 SDL_Quit();
@@ -99,13 +101,17 @@ namespace HUNT {
             impl_->Shutdown();
             return false;
         }
+        impl_->renderer->InitGPU();
         impl_->renderer->SetVSync(true);
 
         //INIT AssetHandler HERE
-        impl_->AssetHandler = std::make_unique<AssetHandler>(impl_->renderer.get());
+        impl_->assetHandler = std::make_unique<AssetHandler>(impl_->renderer.get());
         
         //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
+
+
+        impl_->sceneHandler = std::make_unique<SceneHandler>();
 
         //INIT EDITORUI HERE
         impl_->editorUI = std::make_unique<EditorUI>(impl_->renderer.get());
@@ -117,6 +123,10 @@ namespace HUNT {
 	// This is the main loop of the engine. It handles events, updates, and rendering.
 	// Note that it calls the Application's Start, FixedUpdate, Render, and Stop methods. 
     // This is where the engine and the application interact.
+
+
+
+    //CLEAN THIS UP PLEASE LATER TOM
     int Engine::Run(Application& application) {
         if (!impl_->renderer) return 1;
         impl_->quit = false;
@@ -146,11 +156,17 @@ namespace HUNT {
                 if (impl_->quit) break;
 
                 //TODO: ADD ERROR CHECKS HERE MAYBE
-                application.HandleInput(*this);
+
+
+                impl_->sceneHandler->Init(*impl_->assetHandler);
+                impl_->sceneHandler->Update(0); //put in DT later
+
+                impl_->inputHandler->update();
+                impl_->sceneHandler->FixedUpdate(*impl_->inputHandler);
 
                 impl_->renderer.get()->BeginFrame();
-                application.Render(*this);
                 impl_->editorUI.get()->BuildUI();
+                impl_->sceneHandler->Render(*impl_->renderer);
                 impl_->renderer.get()->EndFrame();
             
 
@@ -193,7 +209,13 @@ namespace HUNT {
 
     AssetHandler& Engine::GetAssetHandler()
     {
-        return *impl_->AssetHandler;
+        return *impl_->assetHandler;
+
+    }
+
+    SceneHandler& Engine::GetSceneHandler()
+    {
+        return *impl_->sceneHandler.get();
     }
 
     void Engine::lockMouse(bool in)

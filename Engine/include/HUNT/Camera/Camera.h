@@ -1,5 +1,5 @@
 //style and ordering taken from shaders project
-
+#pragma once
 #include <HUNT/Math/float3.h>
 #include <HUNT/Math/float4.h>
 #include <HUNT/Math/mat4.h>

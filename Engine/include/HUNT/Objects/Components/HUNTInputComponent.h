@@ -19,12 +19,7 @@ namespace HUNT {
         void FixedUpdate() final {
 
         };
-        void Render(Renderer& rendererIn) {
-            rendererIn.Render(meshData);
-        }
-        void handleInput() {
 
-        };
 
 
 

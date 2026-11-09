@@ -2,8 +2,10 @@
 #pragma once
 
 namespace HUNT {
+    class Renderer;
 
     class HUNTBaseComponent
+
     {
     public:
         HUNTBaseComponent() = default;
@@ -16,6 +18,9 @@ namespace HUNT {
 
         };
         virtual void FixedUpdate(){
+
+        };
+        virtual void Render(Renderer& renderer) {
 
         };
 

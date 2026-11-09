@@ -120,11 +120,13 @@ add_library(Engine STATIC
     Engine/include/HUNT/SceneHandler.h
     Engine/src/SceneHandler.cpp
     Engine/include/HUNT/Scene/Scene.h
-    Engine/include/HUNT/Scene/Scene.cpp
 
 )
 
-add_library(Game STATIC Game/src/Game.cpp "Engine/include/HUNT/Graphics/HUNTMesh/MeshData.h")
+add_library(Game STATIC Game/src/Game.cpp
+ Game/src/MainScene.cpp
+ Game/include/HUNTGame/MainScene.h
+)
 
 #Anything that has a main
 add_executable(EditorApp EditorApp/src/HUNTEditor.cpp)
