@@ -34,6 +34,14 @@ SET(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLM_BUILD_LIBRARY OFF CACHE BOOL "" FORCE)
 set(GLM_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
+#JOLT
+set(JPH_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_VIEWER OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_PERFORMANCE_TEST OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_SHARED_LIBS  OFF CACHE BOOL "" FORCE)
+set(JPH_ENABLE_ASSERTS OFF CACHE BOOL "" FORCE)
+
 
 # FetchContent will download SDL3 from the specified Git repository and tag, and make it available for linking in our project.
 # Give it a meaningful name, tell us where to find it and which version, and don’t get the full commit history
@@ -70,6 +78,16 @@ FetchContent_Declare(glm
 )
 
 FetchContent_MakeAvailable(glm)
+
+
+# Include Jolt
+FetchContent_Declare(Jolt
+    GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
+    GIT_TAG v5.6.0
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR Build
+)
+FetchContent_MakeAvailable(Jolt)
 
 FetchContent_Declare(
     imgui
@@ -120,6 +138,10 @@ add_library(Engine STATIC
     Engine/include/HUNT/SceneHandler.h
     Engine/src/SceneHandler.cpp
     Engine/include/HUNT/Scene/Scene.h
+    Engine/src/PhysicsHandler.cpp
+    Engine/include/HUNT/Physics/PhysicsHandler.h
+    Engine/include/HUNT/Physics/JoltBackend.h
+
 
 )
 
@@ -143,6 +165,7 @@ target_link_libraries(Engine PRIVATE imgui)
 target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image) 
 target_link_libraries(Engine PRIVATE  assimp::assimp) 
 target_link_libraries(Engine PUBLIC glm::glm)
+target_link_libraries(Engine PRIVATE Jolt::Jolt)
 target_link_libraries(Game PUBLIC Engine)
 
 target_link_libraries(HUNTGame PRIVATE Game)
