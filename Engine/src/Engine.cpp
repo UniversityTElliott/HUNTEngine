@@ -149,25 +149,26 @@ namespace HUNT {
                 previousTime = now;
 
                 accumulator += elapsed;
-                while (accumulator >= fixedStepTime && !impl_->quit) {
-                    application.FixedUpdate(*this, static_cast<float>(fixedStepTime));
-                    accumulator -= fixedStepTime;
-                }
+
                 if (impl_->quit) break;
 
                 //TODO: ADD ERROR CHECKS HERE MAYBE
-
+                //TODO: ADD HANDLE INPUT TO SCENES
 
                 impl_->sceneHandler->Init(*impl_->assetHandler);
-                impl_->sceneHandler->Update(0); //put in DT later
+                impl_->sceneHandler->Update(*impl_->inputHandler,0); //put in DT later
 
                 impl_->inputHandler->update();
+                while (accumulator >= fixedStepTime && !impl_->quit) {
                 impl_->sceneHandler->FixedUpdate(*impl_->inputHandler);
+                    accumulator -= fixedStepTime;}
 
                 impl_->renderer.get()->BeginFrame();
                 impl_->editorUI.get()->BuildUI();
                 impl_->sceneHandler->Render(*impl_->renderer);
                 impl_->renderer.get()->EndFrame();
+                //Do this at the end to ensure it interupts nothing
+                impl_->sceneHandler->ProcessSceneChange();
             
 
 				//If we're not using vsync, we need to manually delay to avoid a busy loop that maxes CPU usage.
@@ -228,5 +229,7 @@ namespace HUNT {
         SDL_GetWindowSize(impl_->window.get(), &impl_->windowWidth, &impl_->windowHeight);
         SDL_WarpMouseInWindow(impl_->window.get(), impl_->windowWidth / 2.0f, impl_->windowHeight / 2.0f);
     }
+
+
    
 }

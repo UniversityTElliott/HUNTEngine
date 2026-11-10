@@ -7,6 +7,7 @@
 #include <HUNT/SceneHandler.h>
 
 #include <HUNTGame/MainScene.h>
+#include <HUNTGame/TutorialScene.h>
 #include <HUNT/AssetHandler.h>
 
 #include <algorithm>
@@ -22,6 +23,7 @@ namespace HUNTgame {
     bool DemoGame::Start(HUNT::Engine& engine) {
         //Makes and sets main scene
         engine.GetSceneHandler().CreateScene<MainScene>();
+        engine.GetSceneHandler().CreateScene<TutorialScene>();
 
         return true;
     }

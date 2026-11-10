@@ -22,7 +22,7 @@ namespace HUNT
 
         //All parts of the scene
         virtual void Init(AssetHandler& assets) {}
-        virtual void Update(float deltaTime) {}
+        virtual void Update(InputHandler& input,float deltaTime) {}
         virtual void FixedUpdate(InputHandler& input) {}
         virtual void Destroy() {}
 
@@ -41,6 +41,10 @@ namespace HUNT
         const bool& IsInitialised() //Ameircan c++
         {
             return isInitialised;
+        }
+        const bool& IsSceneChangeRequested() //Ameircan c++
+        {
+            return sceneChangeRequested;
         }
         void setInitialised() {
             isInitialised = true;
@@ -68,8 +72,8 @@ namespace HUNT
             return newCamera;
         }
 
-        void SetActiveCamera(Camera* camIn){
-            
+        void SetActiveCamera(Camera* camIn) {
+
             //Check the camera is in the list of cameras
             //TODO:: if not make it? idk
             for (const auto& camera : cameras)
@@ -83,11 +87,28 @@ namespace HUNT
 
         }
 
+        void requestSceneChange(const std::string& sceneNameIn) {
+            sceneRequestName = sceneNameIn;
+            sceneChangeRequested = true;
+        }
+    
+        std::string GetSceneRequestName() {
+            return sceneRequestName;
+
+        }
+
+        void resetSceneChangeRequested() {
+            sceneChangeRequested = false;
+        }
+
     protected:
         std::vector<std::unique_ptr<HUNTObject>> objects;
         std::vector<std::unique_ptr<Camera>> cameras;
         Camera* activeCamera = nullptr;
         bool isInitialised = false;
+        std::string sceneRequestName = "No Scene Requested";
+        bool sceneChangeRequested = false;
+        
 
     private:
         std::string sceneName;

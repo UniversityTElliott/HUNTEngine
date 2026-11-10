@@ -73,11 +73,7 @@ void MainScene::Init(HUNT::AssetHandler& assets)
 
 }
 
-void MainScene::Update(float deltaTime)
-{
-}
-
-void MainScene::FixedUpdate(HUNT::InputHandler& input)
+void MainScene::Update(HUNT::InputHandler& input,float deltaTime)
 {
     float speed = 0.8f;
     float rotSpeed = 1.5f;
@@ -111,20 +107,27 @@ void MainScene::FixedUpdate(HUNT::InputHandler& input)
         defaultCamera->moveUp(-speed);
     }
 
-
+    if (input.wasPressed(HUNT::key::u)) {
+        requestSceneChange("Tutorial");
+    }
 
 
     if (input.isHeld(HUNT::mouse::rightMouse))
     {
         constexpr float sensitivity = 0.15f;
-      //  engine.lockMouse(true);
-       // engine.resetMousePosition();
+        //  engine.lockMouse(true);
+         // engine.resetMousePosition();
         defaultCamera->rotate(input.getMouseXDifference() * sensitivity, -input.getMouseYDifference() * sensitivity);
 
     }
     else {
-       // engine.lockMouse(false);
+        // engine.lockMouse(false);
     }
+}
+
+void MainScene::FixedUpdate(HUNT::InputHandler& input)
+{
+   
 
 }
 

@@ -126,6 +126,8 @@ add_library(Engine STATIC
 add_library(Game STATIC Game/src/Game.cpp
  Game/src/MainScene.cpp
  Game/include/HUNTGame/MainScene.h
+  Game/src/TutorialScene.cpp
+ Game/include/HUNTGame/TutorialScene.h
 )
 
 #Anything that has a main

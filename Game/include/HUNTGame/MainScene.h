@@ -9,7 +9,7 @@ public:
     }
 
     void Init(HUNT::AssetHandler& assets) override;
-    void Update(float deltaTime) override;
+    void Update(HUNT::InputHandler& input,float deltaTime) override;
     void FixedUpdate(HUNT::InputHandler& input) override;
     void Destroy() override;
 

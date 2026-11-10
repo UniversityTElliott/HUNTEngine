@@ -27,6 +27,28 @@ namespace HUNT
         return currentScene;
     }
 
+    void SceneHandler::ProcessSceneChange() {
+        
+        if (currentScene && currentScene->IsSceneChangeRequested()) {
+            for (const auto& scene : allScenes)
+            {
+
+                if (scene->GetName() == currentScene->GetSceneRequestName())
+                {
+
+                    SetCurrentScene(scene.get());
+                    scene->resetSceneChangeRequested();
+                    return;
+                }
+            }
+
+            //Say no scene found 
+            currentScene->resetSceneChangeRequested();
+        }
+
+
+    }
+
     //Read up as to why double const works but single doesnt?
     const std::vector<std::unique_ptr<Scene>>& SceneHandler::GetScenes() const
     {
@@ -41,10 +63,10 @@ namespace HUNT
         }
     }
 
-    void SceneHandler::Update(float deltaTime)
+    void SceneHandler::Update(InputHandler& input,float deltaTime)
     {
         if (currentScene) {
-            currentScene->Update(deltaTime);
+            currentScene->Update(input,deltaTime);
         }
     }
     void SceneHandler::FixedUpdate(InputHandler& input)

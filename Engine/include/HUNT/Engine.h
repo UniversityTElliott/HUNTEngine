@@ -45,8 +45,8 @@ namespace HUNT {
         InputHandler& GetInput();
         AssetHandler& GetAssetHandler();
         SceneHandler& GetSceneHandler();
-        void lockMouse(bool in);
-        void resetMousePosition();
+         void lockMouse(bool in);
+         void resetMousePosition();
 
     private:
 		// The specifics of our engine implementation are hidden in Impl. 
