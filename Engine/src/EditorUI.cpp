@@ -220,5 +220,4 @@ namespace HUNT {
         ImGui::Text("Blank for another feature");
         ImGui::Separator();
     }
-
 }
