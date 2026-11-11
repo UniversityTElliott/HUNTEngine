@@ -130,7 +130,7 @@ target_link_libraries(imgui PUBLIC
 
 
 #Custom Engine stuff below
-#Librarys is basically anything that has a header file
+#Librarys is basically anything that has a header files
 add_library(Engine STATIC
     Engine/src/Engine.cpp
     Engine/src/Renderer.cpp
@@ -190,12 +190,8 @@ if(WIN32)
 add_custom_target(StageRuntime
 COMMAND ${CMAKE_COMMAND} -E copy_if_different
 $<TARGET_FILE:SDL3::SDL3> $<TARGET_FILE_DIR:HUNTGame>
-
-COMMAND ${CMAKE_COMMAND} -E copy_if_different
 $<TARGET_FILE:SDL3_image::SDL3_image-shared> $<TARGET_FILE_DIR:HUNTGame>
-
-COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:assimp::assimp> $<TARGET_FILE_DIR:HUNTGame>
+$<TARGET_FILE:assimp::assimp> $<TARGET_FILE_DIR:HUNTGame>
 
 #Do some ZIP trickery here below
    COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -205,7 +201,7 @@ add_dependencies(HUNTGame StageRuntime)
 add_dependencies(EditorApp StageRuntime)
 endif()
 
-#https://github.com/TechnicJelle/GPUForBeginners/blob/ab63d5d11df06466a67ec46a5e8cd51723629203/CMakeLists.txt#L35-L68 adapted from here
+#https://github.com/TechnicJelle/GPUForBeginners/blob/ab63d5d11df06466a67ec46a5e8cd51723629203/CMakeLists.txt#L35-L68 adapted from here1
 
 
 # Shader Compilation CLEAN UP A TAD

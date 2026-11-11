@@ -427,6 +427,12 @@ namespace HUNT {
     }
     void Renderer::CreateDepthSampler()
     {
+        //Was getting an error in debug with D3D12 issue so this fixes it
+        SDL_PropertiesID props = SDL_CreateProperties();
+        SDL_SetFloatProperty(props,SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_DEPTH_FLOAT,1.0f);
+
+
+
         SDL_GPUTextureCreateInfo depthInfo = {
     .type = SDL_GPU_TEXTURETYPE_2D,
     .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
@@ -435,7 +441,8 @@ namespace HUNT {
     .height = static_cast<Uint32>(impl_->height),
     .layer_count_or_depth = 1,
     .num_levels = 1,
-    .sample_count = SDL_GPU_SAMPLECOUNT_1
+    .sample_count = SDL_GPU_SAMPLECOUNT_1,
+    .props = props
     
         };
 
@@ -449,6 +456,14 @@ namespace HUNT {
         {
             return;
         }
+        //Says mismatch between SDL backend and mine so give the backend mine
+        SDL_PropertiesID props = SDL_CreateProperties();
+        SDL_SetFloatProperty(props,SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT,impl_->defaultColour.x);
+        SDL_SetFloatProperty(props,SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT,impl_->defaultColour.y);
+        SDL_SetFloatProperty(props,SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT,impl_->defaultColour.z);
+        SDL_SetFloatProperty(props,SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT,impl_->defaultColour.w);
+
+
 
         SDL_GPUTextureCreateInfo viewportInfo{
         .type = SDL_GPU_TEXTURETYPE_2D,
@@ -459,6 +474,7 @@ namespace HUNT {
         .layer_count_or_depth = 1,
         .num_levels =1,
         .sample_count = SDL_GPU_SAMPLECOUNT_1, //SAME AS IMGUI CHANGE WITH MORE SAMPLERS //MAYBE MAKE THIS SOMETHING THATS STORED AND INCREASES
+        .props = props
         };
 
         impl_->viewportTexture =SDL_CreateGPUTexture(impl_->gpuDevice.get(),&viewportInfo);
