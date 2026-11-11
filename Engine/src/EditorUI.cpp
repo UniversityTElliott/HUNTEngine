@@ -185,7 +185,7 @@ namespace HUNT {
             transformChanged = true;
         }
 
-        if (ImGui::SliderFloat("Rotation Angle", &angle, 0.0f, 360.0f))
+        if (ImGui::SliderFloat("Rotation Angle", &angle, 0.1f, 359.9f))
         {
             transform.rotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
             transformChanged = true;
