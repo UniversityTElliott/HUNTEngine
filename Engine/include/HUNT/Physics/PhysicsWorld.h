@@ -18,6 +18,7 @@ public:
     void SyncTransforms();
     void InterpolateBodies(JPH::TempAllocator& tempIn, JPH::JobSystemThreadPool& jobIn);
     void UpdateSceneObjects(std::vector<std::unique_ptr<HUNT::HUNTObject>>* objects);
+    void SetBodyTransform(HUNT::HUNTRigidBodyComponent* rb, HUNT::HUNTTransformComponent* transform);
     JPH::BodyID CreateBox(HUNT::HUNTRigidBodyComponent* rb,HUNT::float3 position,HUNT::float3 halfExtent,JPH::EMotionType motionType);
 
     JPH::PhysicsSystem* GetPhysicsSystem()

@@ -119,7 +119,7 @@ namespace HUNT {
         impl_->sceneHandler = std::make_unique<SceneHandler>();
 
         //INIT EDITORUI HERE
-        impl_->editorUI = std::make_unique<EditorUI>(impl_->renderer.get());
+        impl_->editorUI = std::make_unique<EditorUI>(impl_->renderer.get(),impl_->sceneHandler.get());
 
         return true;
 

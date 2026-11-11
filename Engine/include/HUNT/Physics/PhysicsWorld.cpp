@@ -1,4 +1,5 @@
 #include "PhysicsWorld.h"
+#include "PhysicsWorld.h"
 #include "PhysicsHandler.h"
 #include "HUNT/Objects/Components/HUNTRigidBodyComponent.h"
 #include "HUNT/Math/mathFunctions.h"
@@ -137,6 +138,29 @@ void PhysicsWorld::InterpolateBodies(JPH::TempAllocator& tempIn, JPH::JobSystemT
 void PhysicsWorld::UpdateSceneObjects(std::vector<std::unique_ptr<HUNT::HUNTObject>>* objects)
 {
     sceneObjects = objects;
+}
+
+void PhysicsWorld::SetBodyTransform(HUNT::HUNTRigidBodyComponent* rb, HUNT::HUNTTransformComponent* transform)
+{
+    if (!physicsSystem){
+        return;
+    }
+
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+
+    HUNT::float3 position = transform->position;
+    HUNT::quat rotation = transform->rotation;
+
+    JPH::RVec3(position.x, position.y, position.z);
+    JPH::Quat(rotation.x,rotation.y,rotation.z,rotation.w);
+
+    bodyInterface.SetPositionAndRotation(rb->GetBodyID(), JPH::RVec3(position.x, position.y, position.z), JPH::Quat(rotation.x, rotation.y, rotation.z, rotation.w), JPH::EActivation::Activate);
+    //Update interpolation values so the body doesn't snap back
+    rb->previousPosition = position;
+    rb->currentPosition = position;
+
+    rb->previousRotation = rotation;
+    rb->currentRotation = rotation;
 }
 
 JPH::BodyID PhysicsWorld::CreateBox(HUNT::HUNTRigidBodyComponent* rb, HUNT::float3 position, HUNT::float3 halfExtent, JPH::EMotionType motionType)

@@ -5,12 +5,13 @@
 
 namespace HUNT {
     class Renderer;
+    class SceneHandler;
 
 
     class EditorUI {
 
     public:
-        EditorUI(Renderer* renderer);
+        EditorUI(Renderer* renderer, SceneHandler* sceneHandler);
         ~EditorUI();
         void BuildUI();
 
