@@ -49,46 +49,41 @@ set(JPH_ENABLE_ASSERTS OFF CACHE BOOL "" FORCE)
 set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(PROFILER_IN_DISTRIBUTION OFF CACHE BOOL "" FORCE)
 set(JPH_USE_EXTERNAL_PROFILE OFF CACHE BOOL "" FORCE)
-
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
+#JSON
+set(JSON_BuildTests OFF CACHE BOOL "")
 # FetchContent will download SDL3 from the specified Git repository and tag, and make it available for linking in our project.
 # Give it a meaningful name, tell us where to find it and which version, and don’t get the full commit history
+#Sdl3
 FetchContent_Declare(SDL3
 	GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
 	GIT_TAG release-3.4.18
 	GIT_SHALLOW TRUE
-
 )
-
 FetchContent_MakeAvailable(SDL3)
-
+#sdl image
 FetchContent_Declare(SDL3_image
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
     GIT_TAG release-3.4.4
     GIT_SHALLOW TRUE
 )
-
 FetchContent_MakeAvailable(SDL3_image)
-
+#assimp
 FetchContent_Declare(
     Assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
     GIT_TAG v6.0.5
     GIT_SHALLOW TRUE
 )
-
 FetchContent_MakeAvailable(Assimp)
-
+#glm
 FetchContent_Declare(glm
 	GIT_REPOSITORY https://github.com/g-truc/glm.git
 	GIT_TAG 1.0.2
 	GIT_SHALLOW TRUE
 )
-
 FetchContent_MakeAvailable(glm)
-
-
-# Include Jolt
+#jolt
 FetchContent_Declare(Jolt
     GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
     GIT_TAG v5.6.0
@@ -96,23 +91,20 @@ FetchContent_Declare(Jolt
     SOURCE_SUBDIR Build
 )
 FetchContent_MakeAvailable(Jolt)
-
+#imgui
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG v1.93.0
 )
-
 FetchContent_MakeAvailable(imgui)
 
 #For Imgui setup this was used - https://www.youtube.com/watch?v=JpZv9LtxEeo
 add_library(imgui STATIC)
-
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
 )
-
 target_sources(imgui PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -122,13 +114,16 @@ target_sources(imgui PRIVATE
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlgpu3.cpp
 )
-
 target_link_libraries(imgui PUBLIC
     SDL3::SDL3
 )
+#Json
+FetchContent_Declare(json
+    GIT_REPOSITORY https://github.com/nlohmann/json
+    GIT_TAG v3.12.0
+)
 
-
-
+FetchContent_MakeAvailable(json)
 #Custom Engine stuff below
 #Librarys is basically anything that has a header files
 add_library(Engine STATIC
@@ -153,6 +148,8 @@ add_library(Engine STATIC
     Engine/include/HUNT/Physics/PhysicsWorld.cpp
     Engine/include/HUNT/Physics/EntityContactListener.cpp
     Engine/include/HUNT/Physics/EntityContactListener.h
+    Engine/include/HUNT/Scene/SceneSerializer.h
+    Engine/include/HUNT/Scene/SceneSerializer.cpp
 
 
 )
@@ -178,6 +175,7 @@ target_link_libraries(Engine PUBLIC  SDL3_image::SDL3_image)
 target_link_libraries(Engine PRIVATE  assimp::assimp) 
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Engine PRIVATE Jolt::Jolt)
+target_link_libraries(Engine PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(Game PUBLIC Engine)
 target_link_libraries(Game PRIVATE Jolt::Jolt)
 

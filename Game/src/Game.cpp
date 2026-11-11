@@ -46,6 +46,10 @@ namespace HUNTgame {
 
 }
 //TODO NEXT
-//IMGUI
-//JOLT
 //OTHER PROJECTS
+
+
+//1. A way to save and load scenes. 
+// 2. A way to dynamically add objects with buttons in the scene. 
+// 3. A way to see all assets and apply the to things. 
+// 4. A way to move objects around like blender (could use the imgui fork that adds blender esque stuff)

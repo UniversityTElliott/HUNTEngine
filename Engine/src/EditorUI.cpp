@@ -4,6 +4,7 @@
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Scene/Scene.h>
 #include <HUNT/SceneHandler.h>
+#include "HUNT/Scene/SceneSerializer.h"
 #include <imgui.h>
 
 namespace HUNT {
@@ -12,7 +13,7 @@ namespace HUNT {
     {
         Renderer* renderer;
         SceneHandler* sceneHandler;
-
+        std::string sceneMessage;
         //Shows what objects we selected for the unity style editor
         HUNTObject* selectedObject = nullptr;
 
@@ -41,6 +42,29 @@ namespace HUNT {
         ImGuiWindowFlags windowFlags =ImGuiWindowFlags_NoTitleBar |ImGuiWindowFlags_NoResize |ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoCollapse |ImGuiWindowFlags_NoBringToFrontOnFocus;
 
         ImGui::Begin("HUNT Editor",nullptr,windowFlags);
+
+        if (ImGui::Button("Save Scene"))
+        {
+            auto* scene = impl_->sceneHandler->GetCurrentScene();
+
+            if (scene)
+            {
+                if (SceneSerializer::SaveScene(*scene,"Scenes/MainScene.hscene"))
+                {
+                    impl_->sceneMessage = "Scene saved successfully!";
+                }
+                else
+                {
+                    impl_->sceneMessage = "Failed to save scene!";
+                }
+            }
+        }
+
+        ImGui::SameLine();
+
+        ImGui::Text("%s", impl_->sceneMessage.c_str());
+
+        ImGui::Separator();
 
         ImVec2 available =ImGui::GetContentRegionAvail();
 
