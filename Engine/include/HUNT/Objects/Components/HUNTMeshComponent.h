@@ -24,8 +24,8 @@ namespace HUNT {
          void FixedUpdate() final {
 
         };
-         void Render(Renderer& rendererIn) final{
-             rendererIn.Render(*mesh);
+         void Render(Renderer& rendererIn, const HUNT::mat4& worldMatrix) final{
+             rendererIn.Render(*mesh,worldMatrix);
          }
 
 
@@ -42,7 +42,7 @@ namespace HUNT {
 
     private:
 
-        HUNT::Mesh* mesh;
+        HUNT::Mesh* mesh = nullptr;
 
     };
 

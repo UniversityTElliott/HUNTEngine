@@ -1,22 +1,27 @@
 cmake_minimum_required(VERSION 3.24)
+cmake_policy(SET CMP0091 NEW)
 project(HUNTEngine LANGUAGES CXX)
+
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+#Use the dynamic C++ runtime (/MD and /MDd) for all targets
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 include(FetchContent)
 
-# SDL3
-# We want to build SDL3 as a shared library (DLL), and we don't need the static library, tests, or examples.
+#SDL3
+#build SDL3 as a shared library (DLL)
 set(SDL_SHARED ON CACHE BOOL "Build shared SDL3" FORCE)
 set(SDL_STATIC OFF CACHE BOOL "Do not build static SDL3" FORCE)
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "Do not build SDL3 test support" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "Do not build SDL3 tests" FORCE)
 set(SDL_EXAMPLES OFF CACHE BOOL "Do not build SDL3 examples" FORCE)
 
-#SDL image
-# Disable formats we don't need
+#SDL imagevb
+#Disable formats
 set(SDLIMAGE_VENDORED OFF CACHE BOOL "Disable zLib" FORCE)
 set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WebP" FORCE)
@@ -39,10 +44,13 @@ set(JPH_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_VIEWER OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_PERFORMANCE_TEST OFF CACHE BOOL "" FORCE)
-set(JPH_BUILD_SHARED_LIBS  OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(JPH_ENABLE_ASSERTS OFF CACHE BOOL "" FORCE)
+set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(PROFILER_IN_DISTRIBUTION OFF CACHE BOOL "" FORCE)
+set(JPH_USE_EXTERNAL_PROFILE OFF CACHE BOOL "" FORCE)
 
-
+set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
 # FetchContent will download SDL3 from the specified Git repository and tag, and make it available for linking in our project.
 # Give it a meaningful name, tell us where to find it and which version, and don’t get the full commit history
 FetchContent_Declare(SDL3
@@ -141,6 +149,10 @@ add_library(Engine STATIC
     Engine/src/PhysicsHandler.cpp
     Engine/include/HUNT/Physics/PhysicsHandler.h
     Engine/include/HUNT/Physics/JoltBackend.h
+    Engine/include/HUNT/Physics/PhysicsWorld.h
+    Engine/include/HUNT/Physics/PhysicsWorld.cpp
+    Engine/include/HUNT/Physics/EntityContactListener.cpp
+    Engine/include/HUNT/Physics/EntityContactListener.h
 
 
 )
@@ -167,6 +179,7 @@ target_link_libraries(Engine PRIVATE  assimp::assimp)
 target_link_libraries(Engine PUBLIC glm::glm)
 target_link_libraries(Engine PRIVATE Jolt::Jolt)
 target_link_libraries(Game PUBLIC Engine)
+target_link_libraries(Game PRIVATE Jolt::Jolt)
 
 target_link_libraries(HUNTGame PRIVATE Game)
 target_link_libraries(EditorApp PRIVATE Game)

@@ -8,6 +8,7 @@
 #include "HUNT/Graphics/HUNTMesh/Texture.h"
 #include"GPU/MeshGPUBuffers.h"
 #include"GPU/ShaderBuffers.h"
+#include <HUNT/Math/mat4.h>
 //https://gpuforbeginners.com/
 //https://github.com/TheSpydog/SDL_gpu_examples/blob/main/Examples/TexturedQuad.c
 
@@ -56,7 +57,7 @@ namespace HUNT {
 
         //Rendering block
         void BeginFrame();
-        void Render(HUNT::Mesh& meshIn);
+        void Render(HUNT::Mesh& meshIn, const HUNT::mat4& worldMatrix);
         void EndFrame();
         
     private:

@@ -35,8 +35,7 @@ namespace Layers
 	static constexpr JPH::ObjectLayer PLAYER = 2;
 	static constexpr JPH::ObjectLayer WORLD = 3;
 	static constexpr JPH::ObjectLayer TRIGGER = 4;
-	static constexpr JPH::ObjectLayer RESPAWN = 5;
-	static constexpr JPH::ObjectLayer NUM_LAYERS = 6;
+	static constexpr JPH::ObjectLayer NUM_LAYERS = 5;
 };
 
 //Class that determines if two object layers can collide
@@ -78,6 +77,8 @@ namespace BroadPhaseLayers
 };
 
 
+
+
 class BPLayerInterfaceImpl final : public JPH::BroadPhaseLayerInterface
 {
 public:
@@ -87,9 +88,8 @@ public:
 		mObjectToBroadPhase[Layers::WORLD] = BroadPhaseLayers::NON_MOVING; // static
 		mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
 		mObjectToBroadPhase[Layers::TRIGGER] = BroadPhaseLayers::NON_MOVING;
-
-		mObjectToBroadPhase[Layers::PLAYER] = BroadPhaseLayers::MOVING;     // dynamic
 		mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+		mObjectToBroadPhase[Layers::PLAYER] = BroadPhaseLayers::MOVING;     // dynamic
 	}
 
 	virtual JPH::uint GetNumBroadPhaseLayers() const override
@@ -122,9 +122,6 @@ public:
 		{
 		case Layers::NON_MOVING:
 		case Layers::WORLD:
-		case Layers::RESPAWN:
-			return inLayer2 == BroadPhaseLayers::MOVING;
-
 		case Layers::MOVING:
 		case Layers::PLAYER:
 			return inLayer2 == BroadPhaseLayers::MOVING or inLayer2 == BroadPhaseLayers::NON_MOVING;
@@ -135,35 +132,5 @@ public:
 	}
 };
 
-class MyContactListener : public JPH::ContactListener
-{
-public:
-
-	std::atomic<bool> scene_change_requested = false;
-
-	virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-	{
-		auto layer1 = inBody1.GetObjectLayer();
-		auto layer2 = inBody2.GetObjectLayer();
-
-		if ((layer1 == Layers::PLAYER && layer2 == Layers::WORLD) ||
-			(layer1 == Layers::WORLD && layer2 == Layers::PLAYER))
-		{
-		}
-
-	}
-
-	virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
-	{
-
-		auto layer1 = inBody1.GetObjectLayer();
-		auto layer2 = inBody2.GetObjectLayer();
-	}
-
-	virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
-	{
-		
-	}
-};
 
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
 #include <HUNT/Math/mat4.h>
+#include <HUNT/Math/quat.h>
 
 namespace HUNT
 {
@@ -25,5 +26,24 @@ namespace HUNT
     inline HUNT::float3 normalise(const HUNT::float3 vecA) //literally just GLMs but for hunt FINALLY I CAN USE THE BRITISH SPELLING!
     {
         return glm::normalize(vecA);
+    }
+    inline HUNT::float3 vectorLerp(const HUNT::float3 vecA, const HUNT::float3 vecB, const float t) 
+    {
+        
+        return HUNT::float3{ std::lerp(vecA.x, vecB.x, t), std::lerp(vecA.y, vecB.y, t), std::lerp(vecA.z, vecB.z, t) };
+    }
+    inline HUNT::quat quaternionSlerp(const HUNT::quat quatA, const HUNT::quat quatB, const float t)
+    {
+        return glm::slerp(quatA, quatB, t);
+    }
+    inline HUNT::mat4 calculateWorldMatrix(const HUNT::float3& position,const HUNT::quat& rotation,const HUNT::float3& scale)
+    {
+        HUNT::mat4 translationMatrix = glm::translate(glm::mat4(1.0f),position);
+
+        HUNT::mat4 rotationMatrix = glm::mat4_cast(rotation);
+
+        HUNT::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f),scale);
+
+        return translationMatrix * rotationMatrix * scaleMatrix;
     }
 }

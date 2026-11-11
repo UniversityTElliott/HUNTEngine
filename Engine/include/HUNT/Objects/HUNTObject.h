@@ -3,13 +3,19 @@
 #include<vector>
 #include <memory>
 #include <HUNT/Objects/Components/HUNTBaseComponent.h>
+#include <HUNT/Objects/Components/HUNTTransformComponent.h>
+#include <HUNT/Math/mathFunctions.h>
+#include <HUNT/Math/mat4.h>
 namespace HUNT {
     class Renderer;
 
     class HUNTObject
     {
     public:
-        HUNTObject() = default;
+        HUNTObject() : objectID(nextObjectID++) {
+            AddComponent<HUNTTransformComponent>();
+            
+        }
         ~HUNTObject() = default;
 
         void Init() {
@@ -28,10 +34,23 @@ namespace HUNT {
             }
         };
         void Render(Renderer& renderer) {
-            for (auto& component : objectComponents) {
-                component->Render(renderer);
+            auto* transform = GetComponent<HUNTTransformComponent>();
+
+            if (!transform) {
+                return;
             }
-        };
+
+            HUNT::mat4 worldMatrix = HUNT::calculateWorldMatrix(transform->position,transform->rotation,transform->scale);
+
+            for (auto& component : objectComponents) {
+                component->Render(renderer, worldMatrix);
+            }
+        }
+
+        uint64_t GetID() const {
+            return objectID;
+        }
+
 
         template<class T> inline T* AddComponent()
         {
@@ -41,6 +60,7 @@ namespace HUNT {
             return pointer;
         }
 
+        
         template<class T> T* GetComponent() noexcept{
             static_assert(std::is_base_of_v<HUNTBaseComponent, T>);
             for (const auto& component : objectComponents) {
@@ -53,6 +73,10 @@ namespace HUNT {
         
 
     private:
+
+        //https://stackoverflow.com/questions/14585385/best-practice-how-to-get-a-unique-identifier-for-the-object Not sure if good practice but works for now
+        inline static uint64_t  nextObjectID = 1;
+        uint64_t objectID;
         std::vector<std::unique_ptr<HUNTBaseComponent>> objectComponents;
 
     };

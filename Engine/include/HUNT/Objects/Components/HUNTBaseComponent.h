@@ -1,6 +1,6 @@
 
 #pragma once
-
+#include <HUNT/Math/mat4.h>
 namespace HUNT {
     class Renderer;
 
@@ -20,7 +20,7 @@ namespace HUNT {
         virtual void FixedUpdate(){
 
         };
-        virtual void Render(Renderer& renderer) {
+        virtual void Render(Renderer& renderer, const HUNT::mat4& worldMatrix) {
 
         };
 

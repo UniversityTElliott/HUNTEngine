@@ -3,6 +3,7 @@
 #include "HUNT/AssetHandler.h"
 #include "HUNT/Input/InputHandler.h"
 #include <HUNT/Camera/Camera.h>
+#include <HUNT/Physics/PhysicsWorld.h>
 
 #include <string>
 #include <memory>
@@ -101,6 +102,11 @@ namespace HUNT
             sceneChangeRequested = false;
         }
 
+        PhysicsWorld* GetPhysicsWorld()
+        {
+            return physicsWorld.get();
+        }
+
     protected:
         std::vector<std::unique_ptr<HUNTObject>> objects;
         std::vector<std::unique_ptr<Camera>> cameras;
@@ -108,6 +114,7 @@ namespace HUNT
         bool isInitialised = false;
         std::string sceneRequestName = "No Scene Requested";
         bool sceneChangeRequested = false;
+        std::unique_ptr<PhysicsWorld> physicsWorld;
         
 
     private:

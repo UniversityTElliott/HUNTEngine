@@ -27,11 +27,14 @@ namespace HUNT {
         void FixedUpdate() final {
 
         };
-        void Render(Renderer& rendererIn) final {
-            for (auto& model : model->getModelMeshes()) {
-                rendererIn.Render(model);
+        void Render(Renderer& rendererIn, const HUNT::mat4& worldMatrix) final {
+            if (model == nullptr) {
+                return;
             }
-            
+
+            for (auto& mesh : model->getModelMeshes()) {
+                rendererIn.Render(mesh, worldMatrix);
+            }
         }
 
         void setModel(Model* data)
@@ -42,7 +45,7 @@ namespace HUNT {
 
     private:
         
-        HUNT::Model* model;
+        HUNT::Model* model = nullptr;
 
     };
 

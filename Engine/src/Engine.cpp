@@ -4,6 +4,7 @@
 #include <HUNT/Input/InputHandler.h>
 #include <HUNT/AssetHandler.h>
 #include <HUNT/SceneHandler.h>
+#include <HUNT/Physics/PhysicsHandler.h>
 #include <SDL3/SDL.h>
 #include <HUNT/Editor/EditorUI.h>
 #include <algorithm>
@@ -36,6 +37,7 @@ namespace HUNT {
         std::unique_ptr<AssetHandler> assetHandler;
         std::unique_ptr<EditorUI> editorUI;
         std::unique_ptr<SceneHandler> sceneHandler;
+        std::unique_ptr<PhysicsHandler> physicsHandler;
 
         bool sdlInitialised = false;
         bool quit = false;
@@ -48,6 +50,8 @@ namespace HUNT {
         void Shutdown() noexcept {
             renderer.reset();
             window.reset();
+            physicsHandler->Reset();
+            physicsHandler.reset();
             inputHandler.reset();
             assetHandler.reset();
 
@@ -110,7 +114,8 @@ namespace HUNT {
         //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
 
-
+        impl_->physicsHandler = std::make_unique<PhysicsHandler>();
+        impl_->physicsHandler.get()->Init();
         impl_->sceneHandler = std::make_unique<SceneHandler>();
 
         //INIT EDITORUI HERE
@@ -156,17 +161,20 @@ namespace HUNT {
                 //TODO: ADD HANDLE INPUT TO SCENES
 
                 impl_->sceneHandler->Init(*impl_->assetHandler);
-                impl_->sceneHandler->Update(*impl_->inputHandler,0); //put in DT later
+                impl_->sceneHandler->Update(*impl_->inputHandler,elapsed); //put in DT later
+
+                impl_->physicsHandler->SetActiveWorld(impl_->sceneHandler->GetCurrentScene()->GetPhysicsWorld());
 
                 impl_->inputHandler->update();
                 while (accumulator >= fixedStepTime && !impl_->quit) {
                 impl_->sceneHandler->FixedUpdate(*impl_->inputHandler);
+                impl_->physicsHandler->FixedUpdate();
                     accumulator -= fixedStepTime;}
 
-                impl_->renderer.get()->BeginFrame();
-                impl_->editorUI.get()->BuildUI();
+                impl_->renderer->BeginFrame();
+                impl_->editorUI->BuildUI();
                 impl_->sceneHandler->Render(*impl_->renderer);
-                impl_->renderer.get()->EndFrame();
+                impl_->renderer->EndFrame();
                 //Do this at the end to ensure it interupts nothing
                 impl_->sceneHandler->ProcessSceneChange();
             

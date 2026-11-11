@@ -5,14 +5,18 @@
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Objects/Components/HUNTMeshComponent.h>
 #include <HUNT/Objects/Components/HUNTModelComponent.h>
+#include <HUNT/Objects/Components/HUNTRigidBodyComponent.h>
+#include <Jolt/Jolt.h>
 #include <HUNT/Math/mathFunctions.h>
 
 
 void MainScene::Init(HUNT::AssetHandler& assets)
 {
+    //Sort out physics into nice constructors and stuff
+    physicsWorld = std::make_unique<PhysicsWorld>();
+    physicsWorld->Init();
 
     HUNT::Camera* camera = AddCamera();
-
     camera->setPosition(0.f, 0.f, -10.f);
     camera->setRotation(0.f, 0.f, 0.f);
 
@@ -55,13 +59,38 @@ void MainScene::Init(HUNT::AssetHandler& assets)
 
 
     //THIS IS ALL A TEST
-
-
-
-    auto triangle = std::make_unique<HUNT::HUNTObject>();
-    auto* meshComp = triangle->AddComponent<HUNT::HUNTMeshComponent>();
+    auto groundCube = std::make_unique<HUNT::HUNTObject>();
+    auto* meshComp = groundCube->AddComponent<HUNT::HUNTMeshComponent>();
     meshComp->setMesh(assets.GetMesh("Cube"));
-    objects.push_back(std::move(triangle));
+    auto* groundTransform = groundCube->GetComponent<HUNT::HUNTTransformComponent>();
+    groundTransform->position = HUNT::float3(0.f, 0.f, 0.f);
+    groundTransform->scale = HUNT::float3(50.f, 1.f, 50.f);
+    // Physics
+    auto* rigidBodyGround = groundCube->AddComponent<HUNT::HUNTRigidBodyComponent>();
+    rigidBodyGround->SetTransform(groundTransform);
+    physicsWorld->CreateBox(rigidBodyGround,
+        HUNT::float3(0.f, 0.f, 0.f),
+        HUNT::float3(25.f, 0.5f, 25.f),
+        JPH::EMotionType::Static);
+    objects.push_back(std::move(groundCube));
+
+    //Falling cube
+    auto fallingCube = std::make_unique<HUNT::HUNTObject>();
+    auto* meshComp1 = fallingCube->AddComponent<HUNT::HUNTMeshComponent>();
+    meshComp1->setMesh(assets.GetMesh("Cube"));
+    auto* fallingTransform = fallingCube->GetComponent<HUNT::HUNTTransformComponent>();
+    fallingTransform->position = HUNT::float3(0.f, 50.f, 0.f);
+    fallingTransform->scale = HUNT::float3(1.f, 1.f, 1.f);
+    // Physics
+    auto* rigidBodyFalling = fallingCube->AddComponent<HUNT::HUNTRigidBodyComponent>();
+    rigidBodyFalling->SetTransform(fallingTransform);
+    physicsWorld->CreateBox(rigidBodyFalling,
+        HUNT::float3(0.f, 50.f, 0.f),
+        HUNT::float3(0.5f, 0.5f, 0.5f),
+        JPH::EMotionType::Dynamic);
+
+    objects.push_back(std::move(fallingCube));
+
 
     auto model = std::make_unique<HUNT::HUNTObject>();
     auto* modelComp = model->AddComponent<HUNT::HUNTModelComponent>();
@@ -70,12 +99,13 @@ void MainScene::Init(HUNT::AssetHandler& assets)
 
 
 
+    physicsWorld->UpdateSceneObjects(&objects);
 
 }
 
 void MainScene::Update(HUNT::InputHandler& input,float deltaTime)
 {
-    float speed = 0.8f;
+    float speed = 0.08f;
     float rotSpeed = 1.5f;
 
     HUNT::Camera* defaultCamera = GetActiveCamera();
@@ -135,4 +165,5 @@ void MainScene::FixedUpdate(HUNT::InputHandler& input)
 
 void MainScene::Destroy()
 {
+    physicsWorld.reset();
 }

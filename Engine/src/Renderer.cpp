@@ -1,5 +1,4 @@
 
-
 #include <HUNT/Graphics/Renderer.h>
 #include <HUNT/Graphics/HUNTMesh/Mesh.h>
 #include <HUNT/Graphics/GPU/MeshGPUBuffers.h>
@@ -802,7 +801,9 @@ namespace HUNT {
     
     }
 
-    void Renderer::Render(HUNT::Mesh& meshIn)
+    
+
+    void Renderer::Render(HUNT::Mesh& meshIn, const HUNT::mat4& worldMatrix)
     {
         //TODO::ADD FALLBACKS FOR EMPTY MESH OR STRUCTURE EHRE
         if (impl_->renderPass == nullptr or impl_->renderCommandBuffer == nullptr or impl_->gpuPipeline == nullptr)
@@ -851,7 +852,11 @@ namespace HUNT {
         };
         SDL_BindGPUIndexBuffer(impl_->renderPass, indexBufferBound.data(), SDL_GPU_INDEXELEMENTSIZE_32BIT);
 
-        SDL_PushGPUVertexUniformData(impl_->renderCommandBuffer, 0, &impl_->cameraMatrix, sizeof(HUNT::MatrixBufferType));
+   
+        HUNT::MatrixBufferType matrices = impl_->cameraMatrix;
+        matrices.world = worldMatrix;
+
+        SDL_PushGPUVertexUniformData(impl_->renderCommandBuffer, 0, &matrices, sizeof(HUNT::MatrixBufferType));
 
         SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
 
