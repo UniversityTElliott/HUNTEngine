@@ -68,6 +68,9 @@ namespace HUNT {
 
             if (scene)
             {
+                //reset chosen object prevents crashes
+                impl_->selectedObject = nullptr;
+
                 if (SceneSerializer::LoadScene(*scene, "Scenes/MainScene.hscene"))
                 {
                     impl_->sceneMessage = "Scene loaded successfully!";
@@ -204,15 +207,21 @@ namespace HUNT {
         ImGui::Separator();
 
         // Get the selected object's Transform
-        auto& transform = *impl_->selectedObject->GetComponent<HUNTTransformComponent>();
+        auto* transform = impl_->selectedObject->GetComponent<HUNTTransformComponent>();
+
+        if (transform == nullptr)
+        {
+            ImGui::Text("No Transform component!");
+            return;
+        }
         bool transformChanged = false;
         //POSITION
-        if (ImGui::DragFloat3("Position", &transform.position.x, 0.1f))
+        if (ImGui::DragFloat3("Position", &transform->position.x, 0.1f))
         {
             transformChanged = true;
         }
         //ROTATION
-        HUNT::quat rotation = glm::normalize(transform.rotation);
+        HUNT::quat rotation = glm::normalize(transform->rotation);
         float angle = glm::degrees(glm::angle(rotation));
         float3 axis = glm::axis(rotation);
         //MAke sure no weird angles
@@ -224,18 +233,18 @@ namespace HUNT {
         if (ImGui::SliderFloat3("Rotation Axis", &axis.x, -1.f,1.f))
         {
             axis = glm::normalize(axis);
-            transform.rotation = glm::angleAxis(glm::radians(angle), axis);
+            transform->rotation = glm::angleAxis(glm::radians(angle), axis);
             transformChanged = true;
         }
 
         if (ImGui::SliderFloat("Rotation Angle", &angle, 0.1f, 359.9f))
         {
-            transform.rotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
+            transform->rotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
             transformChanged = true;
         }
 
         //SCALE
-        if (ImGui::DragFloat3("Scale (Does not change physics)", &transform.scale.x, 0.1f))
+        if (ImGui::DragFloat3("Scale (Does not change physics)", &transform->scale.x, 0.1f))
         {
             transformChanged = true;
         }
@@ -252,7 +261,7 @@ namespace HUNT {
                 auto& bodyInterface = scene->GetPhysicsWorld()->GetPhysicsSystem()->GetBodyInterface();
                 if (bodyInterface.GetMotionType(rb->GetBodyID()) != JPH::EMotionType::Static)
                 {
-                    scene->GetPhysicsWorld()->SetBodyTransform(rb, &transform);
+                    scene->GetPhysicsWorld()->SetBodyTransform(rb, transform);
                 }
             }
         }
