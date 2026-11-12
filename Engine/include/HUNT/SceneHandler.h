@@ -35,7 +35,7 @@ namespace HUNT
         Scene* GetCurrentScene() const;
         void ProcessSceneChange(); //IDK IF I LIKE IT NEEDING ASSET MAYBE CHANGE
         const std::vector<std::unique_ptr<Scene>>&GetScenes() const;
-        void Init(AssetHandler& asset);
+        void Init(Renderer& rendererIn);
         void Update(InputHandler& input,float deltaTime);
         void FixedUpdate(InputHandler& input);
         void Render(Renderer& renderer);

@@ -22,7 +22,7 @@ namespace HUNT
         virtual ~Scene() = default;
 
         //All parts of the scene
-        virtual void Init(AssetHandler& assets) {}
+        virtual void Init() {}
         virtual void Update(InputHandler& input,float deltaTime) {}
         virtual void FixedUpdate(InputHandler& input) {}
         virtual void Destroy() {}
@@ -39,6 +39,22 @@ namespace HUNT
         {
             return objects;
         }
+        //ONLY FOR USE IN SERIALIZATION
+        HUNTObject* CreateObject()
+        {
+            auto object = std::make_unique<HUNTObject>();
+
+            HUNTObject* objectPtr = object.get();
+
+            objects.push_back(std::move(object));
+
+            return objectPtr;
+        }
+        const void ClearObjects()
+        {
+            return objects.clear();
+        }
+
         const bool& IsInitialised() //Ameircan c++
         {
             return isInitialised;
@@ -101,10 +117,21 @@ namespace HUNT
         void resetSceneChangeRequested() {
             sceneChangeRequested = false;
         }
-
+        void SetPhysicsWorld(std::unique_ptr<PhysicsWorld> physicsIn)
+        {
+            physicsWorld = std::move(physicsIn);
+        }
+        void SetSceneAssets(std::unique_ptr<AssetHandler> assetsIn)
+        {
+            sceneAssets = std::move(assetsIn);
+        }
         PhysicsWorld* GetPhysicsWorld()
         {
             return physicsWorld.get();
+        }
+        AssetHandler* GetSceneAssets()
+        {
+            return sceneAssets.get();
         }
 
     protected:
@@ -115,6 +142,7 @@ namespace HUNT
         std::string sceneRequestName = "No Scene Requested";
         bool sceneChangeRequested = false;
         std::unique_ptr<PhysicsWorld> physicsWorld;
+        std::unique_ptr<AssetHandler> sceneAssets;
         
 
     private:

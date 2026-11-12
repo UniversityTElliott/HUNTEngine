@@ -34,7 +34,6 @@ namespace HUNT {
         std::unique_ptr<SDL_Window, WindowDeleter> window;
         std::unique_ptr<Renderer> renderer;
         std::unique_ptr<InputHandler> inputHandler;
-        std::unique_ptr<AssetHandler> assetHandler;
         std::unique_ptr<EditorUI> editorUI;
         std::unique_ptr<SceneHandler> sceneHandler;
         std::unique_ptr<PhysicsHandler> physicsHandler;
@@ -53,7 +52,7 @@ namespace HUNT {
             physicsHandler->Reset();
             physicsHandler.reset();
             inputHandler.reset();
-            assetHandler.reset();
+
 
             if (sdlInitialised)
                 SDL_Quit();
@@ -107,10 +106,6 @@ namespace HUNT {
         }
         impl_->renderer->InitGPU();
         impl_->renderer->SetVSync(true);
-
-        //INIT AssetHandler HERE
-        impl_->assetHandler = std::make_unique<AssetHandler>(impl_->renderer.get());
-        
         //INIT INPUT HANDLER HERE
         impl_->inputHandler = std::make_unique<InputHandler>();
 
@@ -160,7 +155,7 @@ namespace HUNT {
                 //TODO: ADD ERROR CHECKS HERE MAYBE
                 //TODO: ADD HANDLE INPUT TO SCENES
 
-                impl_->sceneHandler->Init(*impl_->assetHandler);
+                impl_->sceneHandler->Init(*impl_->renderer);
                 impl_->sceneHandler->Update(*impl_->inputHandler,elapsed); //put in DT later
 
                 impl_->physicsHandler->SetActiveWorld(impl_->sceneHandler->GetCurrentScene()->GetPhysicsWorld());
@@ -214,12 +209,6 @@ namespace HUNT {
     InputHandler& Engine::GetInput()
     {
         return *impl_->inputHandler;
-    }
-
-    AssetHandler& Engine::GetAssetHandler()
-    {
-        return *impl_->assetHandler;
-
     }
 
     SceneHandler& Engine::GetSceneHandler()

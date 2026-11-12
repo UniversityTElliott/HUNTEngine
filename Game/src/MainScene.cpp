@@ -10,12 +10,8 @@
 #include <HUNT/Math/mathFunctions.h>
 
 
-void MainScene::Init(HUNT::AssetHandler& assets)
+void MainScene::Init()
 {
-    //Sort out physics into nice constructors and stuff
-    physicsWorld = std::make_unique<PhysicsWorld>();
-    physicsWorld->Init();
-
     HUNT::Camera* camera = AddCamera();
     camera->setPosition(0.f, 0.f, -10.f);
     camera->setRotation(0.f, 0.f, 0.f);
@@ -50,18 +46,18 @@ void MainScene::Init(HUNT::AssetHandler& assets)
     //ADD SOMETHING THAT LETS YOU LOAD ALL THE TEXTURES BEFOREHAND AND JUST GRAB THEM BY A NAME??? maybe
 
    //Test
-    assets.LoadTextureToAssetHandler("TestAssets/bunny.png", "bunny");
-    assets.LoadModelToAssetHandler("TestAssets/Goron.obj", "Goron");
+    sceneAssets->LoadTextureToAssetHandler("TestAssets/bunny.png", "bunny");
+    sceneAssets->LoadModelToAssetHandler("TestAssets/Goron.obj", "Goron");
 
     HUNT::Material bunnyMat;
-    bunnyMat.SetTexture(assets.GetTexture("bunny"));
-    assets.LoadMeshToAssetHandler(data1, bunnyMat, "Cube");
+    bunnyMat.SetTexture(sceneAssets->GetTexture("bunny"));
+    sceneAssets->LoadMeshToAssetHandler(data1, bunnyMat, "Cube");
 
 
     //THIS IS ALL A TEST
     auto groundCube = std::make_unique<HUNT::HUNTObject>();
     auto* meshComp = groundCube->AddComponent<HUNT::HUNTMeshComponent>();
-    meshComp->setMesh(assets.GetMesh("Cube"));
+    meshComp->SetMesh(sceneAssets->GetMesh("Cube"));
     auto* groundTransform = groundCube->GetComponent<HUNT::HUNTTransformComponent>();
     groundTransform->position = HUNT::float3(0.f, 0.f, 0.f);
     groundTransform->scale = HUNT::float3(50.f, 1.f, 50.f);
@@ -77,7 +73,7 @@ void MainScene::Init(HUNT::AssetHandler& assets)
     //Falling cube
     auto fallingCube = std::make_unique<HUNT::HUNTObject>();
     auto* meshComp1 = fallingCube->AddComponent<HUNT::HUNTMeshComponent>();
-    meshComp1->setMesh(assets.GetMesh("Cube"));
+    meshComp1->SetMesh(sceneAssets->GetMesh("Cube"));
     auto* fallingTransform = fallingCube->GetComponent<HUNT::HUNTTransformComponent>();
     fallingTransform->position = HUNT::float3(0.f, 50.f, 0.f);
     fallingTransform->scale = HUNT::float3(1.f, 1.f, 1.f);
@@ -94,7 +90,7 @@ void MainScene::Init(HUNT::AssetHandler& assets)
 
     auto model = std::make_unique<HUNT::HUNTObject>();
     auto* modelComp = model->AddComponent<HUNT::HUNTModelComponent>();
-    modelComp->setModel(assets.GetModel("Goron"));
+    modelComp->setModel(sceneAssets->GetModel("Goron"));
     objects.push_back(std::move(model));
 
 

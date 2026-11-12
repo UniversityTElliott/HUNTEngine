@@ -7,4 +7,5 @@ class SceneSerializer
 {
 public:
     static bool SaveScene(HUNT::Scene& scene, const std::string& filepath);
+    static bool LoadScene(HUNT::Scene& scene, const std::string& filepath);
 };

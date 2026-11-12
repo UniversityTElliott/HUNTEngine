@@ -6,7 +6,7 @@
 #include <HUNT/Graphics/HUNTMesh/MeshData.h>
 
 #include <HUNT/Graphics/Renderer.h>
-
+#include <cstdio>
 namespace HUNT {
 
     class HUNTMeshComponent : public HUNTBaseComponent
@@ -30,20 +30,23 @@ namespace HUNT {
 
 
 
-         Mesh& getMesh()
+         Mesh& GetMesh()
          {
              return *mesh;
          }
-
-         void setMesh(Mesh* data)
+         void SetMesh(HUNT::Mesh* newMesh)
          {
-             mesh = data;
+             mesh = newMesh;
+         }
+
+         const std::string& GetAssetName() const
+         {
+             return mesh->GetName();
          }
 
     private:
 
         HUNT::Mesh* mesh = nullptr;
-
     };
 
 }

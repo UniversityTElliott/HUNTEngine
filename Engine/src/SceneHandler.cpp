@@ -55,11 +55,14 @@ namespace HUNT
         return allScenes;
     }
 
-    void SceneHandler::Init(AssetHandler& asset)
+    void SceneHandler::Init(Renderer& rendererIn)
     {
         if (currentScene && !currentScene->IsInitialised()) {
             currentScene->setInitialised();
-            currentScene->Init(asset);
+            currentScene->SetPhysicsWorld(std::make_unique<PhysicsWorld>());
+            currentScene->GetPhysicsWorld()->Init();
+            currentScene->SetSceneAssets(std::make_unique<AssetHandler>(&rendererIn));
+            currentScene->Init();
         }
     }
 

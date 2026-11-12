@@ -598,10 +598,10 @@ namespace HUNT {
 
     MeshGPUBuffers& Renderer::GetMeshBuffers(HUNT::Mesh& meshIn)
     {
-        auto meshData = meshIn.getMeshData();
+        auto meshData = meshIn.GetMeshData();
 
         //Attempt to get the mesh
-        auto finalMesh = impl_->allStoredMeshBuffers.find(meshIn.getID());
+        auto finalMesh = impl_->allStoredMeshBuffers.find(meshIn.GetID());
         //If it exsits retun its buffers
         if (finalMesh != impl_->allStoredMeshBuffers.end()) {
             return finalMesh->second;
@@ -612,7 +612,7 @@ namespace HUNT {
         newGPUBuffers.vertexBuffer = CreateVertexBuffer(meshData.vertices);
         newGPUBuffers.indexBuffer = CreateIndexBuffer(meshData.indices);
         //and store them at the same ID returning the newly made buffers 
-        auto [a, b] = impl_->allStoredMeshBuffers.emplace(meshIn.getID(), std::move(newGPUBuffers));
+        auto [a, b] = impl_->allStoredMeshBuffers.emplace(meshIn.GetID(), std::move(newGPUBuffers));
         //idk if its faster to return it FROM the structure or just what I made ill do this for now
         return a->second;
 
@@ -836,7 +836,7 @@ namespace HUNT {
         //impl_->frameVertexBuffers.push_back(vertexBuffer);
 
 
-        HUNT::Texture* texture = meshIn.getMaterial().GetTexture();
+        HUNT::Texture* texture = meshIn.GetMaterial().GetTexture();
         
         if (texture!=nullptr && impl_->textureSampler)
         {
@@ -874,7 +874,7 @@ namespace HUNT {
 
         SDL_PushGPUVertexUniformData(impl_->renderCommandBuffer, 0, &matrices, sizeof(HUNT::MatrixBufferType));
 
-        SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.getMeshData().GetIndexCount(), 1, 0, 0, 0);
+        SDL_DrawGPUIndexedPrimitives(impl_->renderPass, meshIn.GetMeshData().GetIndexCount(), 1, 0, 0, 0);
 
     }
      

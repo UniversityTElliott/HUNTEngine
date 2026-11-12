@@ -50,7 +50,14 @@ namespace HUNT {
         uint64_t GetID() const {
             return objectID;
         }
-
+        void SetID(uint64_t idIn) {
+             objectID = idIn;
+             //If the ID is the biggest one mad then increment next
+             if (idIn >= nextObjectID)
+             {
+                 nextObjectID = idIn + 1;
+             }
+        }
 
         template<class T> inline T* AddComponent()
         {

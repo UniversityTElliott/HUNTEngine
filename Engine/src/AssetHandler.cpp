@@ -154,8 +154,8 @@ namespace HUNT
 
 
             HUNT::Mesh meshToLoad(modelMeshData);
-            meshToLoad.setID(impl_->uniqueMeshIDs++);
-            meshToLoad.setMaterial(material);
+            meshToLoad.SetID(impl_->uniqueMeshIDs++);
+            meshToLoad.SetMaterial(material);
             tempModelMesh.push_back(meshToLoad);
 
         }
@@ -185,9 +185,10 @@ namespace HUNT
         }
 
         HUNT::Mesh newMesh;
-        newMesh.setID(impl_->uniqueMeshIDs++);
-        newMesh.setMaterial(materialIn);
-        newMesh.setMeshData(meshDataIn);
+        newMesh.SetID(impl_->uniqueMeshIDs++);
+        newMesh.SetMaterial(materialIn);
+        newMesh.SetMeshData(meshDataIn);
+        newMesh.SetName(name);
         
         //As models have meshes and they can exist by themself they need shared unique IDS but I want to keep the modelMeshes away from this vector therefore this solution
         uint32_t index = impl_->meshes.size();

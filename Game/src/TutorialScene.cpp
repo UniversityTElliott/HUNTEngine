@@ -8,7 +8,7 @@
 #include <HUNT/Math/mathFunctions.h>
 
 
-void TutorialScene::Init(HUNT::AssetHandler& assets)
+void TutorialScene::Init()
 {
 
     HUNT::Camera* camera = AddCamera();
@@ -17,12 +17,12 @@ void TutorialScene::Init(HUNT::AssetHandler& assets)
     camera->setRotation(0.f, 0.f, 0.f);
 
   
-    assets.LoadTextureToAssetHandler("TestAssets/bunny.png", "bunny");
-    assets.LoadModelToAssetHandler("TestAssets/Goron.obj", "Goron");
+    sceneAssets->LoadTextureToAssetHandler("TestAssets/bunny.png", "bunny");
+    sceneAssets->LoadModelToAssetHandler("TestAssets/Goron.obj", "Goron");
 
     auto model = std::make_unique<HUNT::HUNTObject>();
     auto* modelComp = model->AddComponent<HUNT::HUNTModelComponent>();
-    modelComp->setModel(assets.GetModel("Goron"));
+    modelComp->setModel(sceneAssets->GetModel("Goron"));
     objects.push_back(std::move(model));
 
 

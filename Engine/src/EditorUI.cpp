@@ -62,6 +62,25 @@ namespace HUNT {
 
         ImGui::SameLine();
 
+        if (ImGui::Button("Load Scene"))
+        {
+            auto* scene = impl_->sceneHandler->GetCurrentScene();
+
+            if (scene)
+            {
+                if (SceneSerializer::LoadScene(*scene, "Scenes/MainScene.hscene"))
+                {
+                    impl_->sceneMessage = "Scene loaded successfully!";
+                }
+                else
+                {
+                    impl_->sceneMessage = "Failed to load scene!";
+                }
+            }
+        }
+
+        ImGui::SameLine();
+
         ImGui::Text("%s", impl_->sceneMessage.c_str());
 
         ImGui::Separator();

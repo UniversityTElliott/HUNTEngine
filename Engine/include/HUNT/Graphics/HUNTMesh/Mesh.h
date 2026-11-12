@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include <HUNT/Graphics/HUNTMesh/MeshData.h>
 #include <HUNT/Graphics/HUNTMesh/Material.h>
@@ -19,39 +20,49 @@ namespace HUNT {
         ~Mesh() = default;
 
 
-        MeshData& getMeshData()
+        MeshData& GetMeshData()
         {
             return meshData;
         }
 
-        void setMeshData(const MeshData& data)
+        void SetMeshData(const MeshData& data)
         {
             meshData = data;
         }
 
-        uint32_t getID() {
+        uint32_t GetID() {
             return identifier;
         }
 
 
-        void setID(uint32_t idIn)
+        void SetID(uint32_t idIn)
         {
                 identifier = idIn;
         }
 
-        void setMaterial(HUNT::Material material)
+        void SetMaterial(HUNT::Material material)
         {
             meshMaterial = material;
         }
-        HUNT::Material getMaterial() 
+        HUNT::Material GetMaterial() 
         {
             return meshMaterial;
+        }
+
+        void SetName(const std::string& nameIn)
+        {
+            meshName = nameIn;
+        }
+        const std::string& GetName() const
+        {
+            return meshName;
         }
 
 
     private:
 
        HUNT::MeshData meshData;
+       std::string meshName;
        uint32_t identifier = 0;
        HUNT::Material meshMaterial; //change later idk if I want the mesh to own the material or the renderer
 
